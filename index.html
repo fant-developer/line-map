@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>‹ìœˆË—ŠêŠ‚Ì‘I‘ğ</title>
+  <title>é§†é™¤ä¾é ¼å ´æ‰€ã®é¸æŠ</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     html, body { margin:0; padding:0; height:100%; font-family: sans-serif; }
@@ -21,7 +21,7 @@
 <body>
 
 <div id="map"></div>
-<button id="btn" disabled>‚±‚ÌêŠ‚ğ‘—M</button>
+<button id="btn" disabled>ã“ã®å ´æ‰€ã‚’é€ä¿¡</button>
 
 <script>
   const LIFF_ID = "2009188516-g4iIlaf8";
@@ -60,7 +60,7 @@
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
     );
     const data = await res.json();
-    return data.results[0]?.formatted_address || "ZŠæ“¾¸”s";
+    return data.results[0]?.formatted_address || "ä½æ‰€å–å¾—å¤±æ•—";
   }
 
   document.getElementById("btn").addEventListener("click", async () => {
@@ -73,7 +73,7 @@
     await liff.sendMessages([
       {
         type: "text",
-        text: `ZŠ: ${address}\nˆÜ“x: ${lat}\nŒo“x: ${lng}`
+        text: `ä½æ‰€: ${address}\nç·¯åº¦: ${lat}\nçµŒåº¦: ${lng}`
       }
     ]);
 
@@ -86,8 +86,9 @@
 </script>
 
 <script async
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5FBODh2wVJVjAAFhiM7YHdPamGBq0Hak&callback=initMap">
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI&callback=initMap">
 </script>
 
 </body>
+
 </html>
