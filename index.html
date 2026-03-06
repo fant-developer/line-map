@@ -7,147 +7,128 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
-html, body {
-  margin:0;
-  padding:0;
-  height:100%;
-  font-family:sans-serif;
+html,body{
+margin:0;
+padding:0;
+height:100%;
+font-family:sans-serif;
 }
 
-#map {
-  width:100%;
-  height:75%;
+#map{
+width:100%;
+height:85%;
 }
 
-#address {
-  height:10%;
-  padding:10px;
-  font-size:14px;
-  background:#f5f5f5;
+#btn{
+width:100%;
+height:15%;
+font-size:18px;
+background:#06c755;
+color:white;
+border:none;
 }
 
-#btn {
-  width:100%;
-  height:15%;
-  font-size:18px;
-  background:#06c755;
-  color:white;
-  border:none;
-}
-
-#btn:disabled {
-  background:#999;
+#btn:disabled{
+background:#999;
 }
 </style>
-
 </head>
+
 <body>
 
 <div id="map"></div>
-
-<div id="address">
-地図をタップして場所を選択してください
-</div>
-
-<button id="btn" disabled>この場所で駆除依頼を送信</button>
+<button id="btn" disabled>この場所を送信</button>
 
 <script>
 
-const LIFF_ID = "2009188516-g4iIlaf8";
-const GOOGLE_API_KEY = "AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI";
+const LIFF_ID = "2009188516-g4iIlaf8"
+const GOOGLE_API_KEY = "AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI"
 
-let map;
-let marker;
-let selectedLatLng = null;
+let map
+let marker
+let selectedLatLng=null
 
-async function initLiff() {
-  await liff.init({ liffId: LIFF_ID });
-}
+async function init(){
 
-function initMap() {
+await liff.init({liffId:LIFF_ID})
 
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 43.06888563336119, lng: 141.35077686001165 },
-    zoom: 14
-  });
+console.log("LIFF OK",liff.isInClient())
 
-  map.addListener("click", async (e) => {
-
-    selectedLatLng = e.latLng;
-
-    if (marker) marker.setMap(null);
-
-    marker = new google.maps.Marker({
-      position: selectedLatLng,
-      map: map
-    });
-
-    const lat = selectedLatLng.lat();
-    const lng = selectedLatLng.lng();
-
-    const address = await reverseGeocode(lat, lng);
-
-    document.getElementById("address").innerText =
-      "住所: " + address;
-
-    document.getElementById("btn").disabled = false;
-
-  });
+initMap()
 
 }
 
-async function reverseGeocode(lat, lng) {
+function initMap(){
 
-  const url =
-    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`;
+map=new google.maps.Map(document.getElementById("map"),{
+center:{lat:43.06888563336119,lng:141.35077686001165},
+zoom:14
+})
 
-  try {
+map.addListener("click",(e)=>{
 
-    const res = await fetch(url);
-    const data = await res.json();
+selectedLatLng=e.latLng
 
-    if (data.status === "OK") {
-      return data.results[0].formatted_address;
-    }
+if(marker) marker.setMap(null)
 
-    return "住所取得失敗 (" + data.status + ")";
+marker=new google.maps.Marker({
+position:selectedLatLng,
+map:map
+})
 
-  } catch (e) {
+document.getElementById("btn").disabled=false
 
-    console.error(e);
-    return "住所取得失敗";
-
-  }
+})
 
 }
 
-document.getElementById("btn").addEventListener("click", async () => {
+async function reverseGeocode(lat,lng){
 
-  if (!selectedLatLng) return;
+const url=`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
 
-  const lat = selectedLatLng.lat();
-  const lng = selectedLatLng.lng();
-  const address = await reverseGeocode(lat, lng);
+const res=await fetch(url)
+const data=await res.json()
 
-  const message =
+if(data.status!=="OK") return "住所取得失敗"
+
+return data.results[0].formatted_address
+
+}
+
+document.getElementById("btn").addEventListener("click",async()=>{
+
+if(!selectedLatLng) return
+
+const lat=selectedLatLng.lat()
+const lng=selectedLatLng.lng()
+
+const address=await reverseGeocode(lat,lng)
+
+const message=
 `住所: ${address}
 緯度: ${lat}
-経度: ${lng}`;
+経度: ${lng}`
 
-  await liff.sendMessages([
-    {
-      type: "text",
-      text: message
-    }
-  ]);
+if(liff.isInClient()){
 
-  liff.closeWindow();
+await liff.sendMessages([
+{
+type:"text",
+text:message
+}
+])
 
-});
+liff.closeWindow()
 
-window.initMap = initMap;
+}else{
 
-initLiff();
+alert(message)
+
+}
+
+})
+
+init()
 
 </script>
 
@@ -157,4 +138,3 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwkQccxU8_KuOh_fDkv9V-vEb
 
 </body>
 </html>
-
