@@ -198,10 +198,16 @@ const message =
 
 if(typeof liff!=="undefined" && liff.isInClient()){
 
-await liff.sendMessages([{
+await liff.sendMessages([
+{
 type:"text",
-text:message
-}])
+text:`住所: ${selectedAddress}\n緯度: ${lat}\n経度: ${lng}`
+},
+{
+type:"text",
+text:"駆除依頼登録お願いします"
+}
+])
 
 liff.closeWindow()
 
@@ -223,3 +229,4 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwkQccxU8_KuOh_fDkv9V-vEb
 
 </body>
 </html>
+
