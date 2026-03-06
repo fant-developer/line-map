@@ -1,22 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>駆除依頼場所の選択</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <style>
-    html, body { margin:0; padding:0; height:100%; font-family: sans-serif; }
-    #map { width:100%; height:85%; }
-    #btn {
-      width:100%;
-      height:15%;
-      font-size:18px;
-      background:#06c755;
-      color:white;
-      border:none;
-    }
-    #btn:disabled { background:#999; }
-  </style>
+<meta charset="utf-8">
+<title>駆除依頼場所の選択</title>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<style>
+html, body {
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family:sans-serif;
+}
+
+#map {
+  width:100%;
+  height:85%;
+}
+
+#btn {
+  width:100%;
+  height:15%;
+  font-size:18px;
+  background:#06c755;
+  color:white;
+  border:none;
+}
+
+#btn:disabled {
+  background:#999;
+}
+</style>
+
 </head>
 <body>
 
@@ -24,71 +40,105 @@
 <button id="btn" disabled>この場所を送信</button>
 
 <script>
-  const LIFF_ID = "2009188516-g4iIlaf8";
-  const GOOGLE_API_KEY = "AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI";
 
-  let map;
-  let marker;
-  let selectedLatLng = null;
+const LIFF_ID = "2009188516-g4iIlaf8";
+const GOOGLE_API_KEY = "AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI";
 
-  async function initLiff() {
-    await liff.init({ liffId: LIFF_ID });
-  }
+let map;
+let marker;
+let selectedLatLng = null;
 
-  function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: 43.06888563336119, lng: 141.35077686001165 }, 
-      zoom: 14
-    });
+async function initLiff() {
+  await liff.init({ liffId: LIFF_ID });
+}
 
-    map.addListener("click", (e) => {
-      selectedLatLng = e.latLng;
+function initMap() {
 
-      if (marker) marker.setMap(null);
-
-      marker = new google.maps.Marker({
-        position: selectedLatLng,
-        map: map
-      });
-
-      document.getElementById("btn").disabled = false;
-    });
-  }
-
-  async function reverseGeocode(lat, lng) {
-    const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
-    );
-    const data = await res.json();
-    return data.results[0]?.formatted_address || "住所取得失敗";
-  }
-
-  document.getElementById("btn").addEventListener("click", async () => {
-    if (!selectedLatLng) return;
-
-    const lat = selectedLatLng.lat();
-    const lng = selectedLatLng.lng();
-    const address = await reverseGeocode(lat, lng);
-
-    await liff.sendMessages([
-      {
-        type: "text",
-        text: `住所: ${address}\n緯度: ${lat}\n経度: ${lng}`
-      }
-    ]);
-
-    liff.closeWindow();
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 43.06888563336119, lng: 141.35077686001165 },
+    zoom: 14
   });
 
-  window.initMap = initMap;
+  map.addListener("click", (e) => {
 
-  initLiff();
+    selectedLatLng = e.latLng;
+
+    if (marker) {
+      marker.setMap(null);
+    }
+
+    marker = new google.maps.Marker({
+      position: selectedLatLng,
+      map: map
+    });
+
+    document.getElementById("btn").disabled = false;
+
+  });
+
+}
+
+async function reverseGeocode(lat, lng) {
+
+  const url =
+    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`;
+
+  try {
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    console.log("Geocode response:", data);
+
+    if (data.status === "OK") {
+      return data.results[0].formatted_address;
+    }
+
+    return "住所取得失敗 (" + data.status + ")";
+
+  } catch (e) {
+
+    console.error(e);
+    return "住所取得失敗 (通信エラー)";
+
+  }
+
+}
+
+document.getElementById("btn").addEventListener("click", async () => {
+
+  if (!selectedLatLng) return;
+
+  const lat = selectedLatLng.lat();
+  const lng = selectedLatLng.lng();
+
+  const address = await reverseGeocode(lat, lng);
+
+  const message =
+`住所: ${address}
+緯度: ${lat}
+経度: ${lng}`;
+
+  await liff.sendMessages([
+    {
+      type: "text",
+      text: message
+    }
+  ]);
+
+  liff.closeWindow();
+
+});
+
+window.initMap = initMap;
+
+initLiff();
+
 </script>
 
 <script async
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI&callback=initMap">
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI&callback=initMap">
 </script>
 
 </body>
-
 </html>
