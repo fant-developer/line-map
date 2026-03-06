@@ -105,34 +105,22 @@ let marker
 let selectedLatLng = null
 let selectedAddress = ""
 
-
-async function init(){
+async function initLiff(){
 
 try{
-
 await liff.init({ liffId: LIFF_ID })
-
 }catch(e){
-
 console.log("LIFF outside")
-
 }
 
-initMap()
-
 }
-
 
 function initMap(){
 
 map = new google.maps.Map(document.getElementById("map"),{
-
 center:{ lat:43.06888563336119 , lng:141.35077686001165 },
-
 zoom:14,
-
 gestureHandling:"greedy"
-
 })
 
 map.addListener("click",async (e)=>{
@@ -142,14 +130,11 @@ selectedLatLng = e.latLng
 if(marker) marker.setMap(null)
 
 marker = new google.maps.Marker({
-
 position:selectedLatLng,
 map:map
-
 })
 
 document.getElementById("info").innerText="住所取得中..."
-
 document.getElementById("confirmBtn").disabled=false
 
 const lat = selectedLatLng.lat()
@@ -166,7 +151,6 @@ document.getElementById("info").innerText="場所を確認して確定してく�
 
 }
 
-
 async function reverseGeocode(lat,lng){
 
 try{
@@ -175,15 +159,11 @@ const url =
 `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
 
 const res = await fetch(url)
-
 const data = await res.json()
 
 if(data.status!=="OK"){
-
 console.log(data)
-
 return "住所取得失敗"
-
 }
 
 return data.results[0].formatted_address
@@ -191,22 +171,18 @@ return data.results[0].formatted_address
 }catch(e){
 
 console.log(e)
-
 return "住所取得失敗"
 
 }
 
 }
 
-
 document.getElementById("confirmBtn").addEventListener("click",()=>{
 
 document.getElementById("info").innerText="この場所で送信できます"
-
 document.getElementById("sendBtn").disabled=false
 
 })
-
 
 document.getElementById("sendBtn").addEventListener("click",async ()=>{
 
@@ -220,14 +196,11 @@ const message =
 緯度: ${lat}
 経度: ${lng}`
 
-
 if(typeof liff!=="undefined" && liff.isInClient()){
 
 await liff.sendMessages([{
-
 type:"text",
 text:message
-
 }])
 
 liff.closeWindow()
@@ -240,11 +213,9 @@ alert(message)
 
 })
 
-
-init()
+initLiff()
 
 </script>
-
 
 <script async
 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI&callback=initMap">
