@@ -2,27 +2,32 @@
 <html>
 <head>
 <meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 <title>駆除依頼場所の選択</title>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
+
 html,body{
 margin:0;
 padding:0;
 height:100%;
 font-family:sans-serif;
+background:#f5f5f5;
 }
 
 #map{
 width:100%;
-height:85%;
+height:85vh;
 }
 
 #btn{
 width:100%;
-height:15%;
-font-size:18px;
+height:15vh;
+font-size:5vw;
 background:#06c755;
 color:white;
 border:none;
@@ -31,92 +36,153 @@ border:none;
 #btn:disabled{
 background:#999;
 }
+
+#info{
+position:absolute;
+top:10px;
+left:10px;
+background:white;
+padding:8px 10px;
+font-size:3.5vw;
+border-radius:6px;
+box-shadow:0 2px 5px rgba(0,0,0,0.2);
+}
+
 </style>
 </head>
 
 <body>
 
+<div id="info">地図をタップして場所を指定</div>
+
 <div id="map"></div>
+
 <button id="btn" disabled>この場所を送信</button>
 
 <script>
 
 const LIFF_ID = "2009188516-g4iIlaf8"
+
 const GOOGLE_API_KEY = "AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI"
+
 
 let map
 let marker
-let selectedLatLng=null
+let selectedLatLng = null
+
 
 async function init(){
 
-await liff.init({liffId:LIFF_ID})
+try{
 
-console.log("LIFF OK",liff.isInClient())
+await liff.init({ liffId: LIFF_ID })
+
+console.log("LIFF OK", liff.isInClient())
+
+}catch(e){
+
+console.log("LIFF outside", e)
+
+}
 
 initMap()
 
 }
 
+
 function initMap(){
 
-map=new google.maps.Map(document.getElementById("map"),{
-center:{lat:43.06888563336119,lng:141.35077686001165},
-zoom:14
+map = new google.maps.Map(document.getElementById("map"),{
+
+center:{ lat:43.06888563336119 , lng:141.35077686001165 },
+
+zoom:14,
+
+gestureHandling:"greedy"
+
 })
 
 map.addListener("click",(e)=>{
 
-selectedLatLng=e.latLng
+selectedLatLng = e.latLng
 
 if(marker) marker.setMap(null)
 
-marker=new google.maps.Marker({
+marker = new google.maps.Marker({
+
 position:selectedLatLng,
+
 map:map
+
 })
 
-document.getElementById("btn").disabled=false
+document.getElementById("btn").disabled = false
+
+document.getElementById("info").innerText = "場所を確認して送信してください"
 
 })
 
 }
+
 
 async function reverseGeocode(lat,lng){
 
-const url=`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
+try{
 
-const res=await fetch(url)
-const data=await res.json()
+const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
 
-if(data.status!=="OK") return "住所取得失敗"
+const res = await fetch(url)
 
-return data.results[0].formatted_address
+const data = await res.json()
+
+if(data.status !== "OK"){
+
+console.log(data)
+
+return "住所取得失敗"
 
 }
 
-document.getElementById("btn").addEventListener("click",async()=>{
+return data.results[0].formatted_address
+
+}catch(e){
+
+console.log(e)
+
+return "住所取得失敗"
+
+}
+
+}
+
+
+document.getElementById("btn").addEventListener("click", async ()=>{
 
 if(!selectedLatLng) return
 
-const lat=selectedLatLng.lat()
-const lng=selectedLatLng.lng()
+const lat = selectedLatLng.lat()
 
-const address=await reverseGeocode(lat,lng)
+const lng = selectedLatLng.lng()
 
-const message=
+document.getElementById("btn").innerText = "住所取得中..."
+
+const address = await reverseGeocode(lat,lng)
+
+const message =
 `住所: ${address}
 緯度: ${lat}
 経度: ${lng}`
 
-if(liff.isInClient()){
 
-await liff.sendMessages([
-{
+if(typeof liff !== "undefined" && liff.isInClient()){
+
+await liff.sendMessages([{
+
 type:"text",
+
 text:message
-}
-])
+
+}])
 
 liff.closeWindow()
 
@@ -128,9 +194,11 @@ alert(message)
 
 })
 
+
 init()
 
 </script>
+
 
 <script async
 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI&callback=initMap">
