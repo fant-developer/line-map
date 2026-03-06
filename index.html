@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
 
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <title>駆除依頼場所の選択</title>
@@ -21,54 +21,89 @@ background:#f5f5f5;
 
 #map{
 width:100%;
-height:85vh;
+height:75vh;
 }
 
-#btn{
+#panel{
+position:absolute;
+top:10px;
+left:10px;
+right:10px;
+z-index:10;
+}
+
+.box{
+background:white;
+padding:10px;
+margin-bottom:8px;
+border-radius:8px;
+font-size:4vw;
+box-shadow:0 2px 5px rgba(0,0,0,0.2);
+}
+
+#sendBtn{
 width:100%;
-height:15vh;
+height:12vh;
 font-size:5vw;
 background:#06c755;
 color:white;
 border:none;
 }
 
-#btn:disabled{
+#sendBtn:disabled{
 background:#999;
 }
 
-#info{
-position:absolute;
-top:10px;
-left:10px;
-background:white;
-padding:8px 10px;
-font-size:3.5vw;
-border-radius:6px;
-box-shadow:0 2px 5px rgba(0,0,0,0.2);
+#confirmBtn{
+width:100%;
+height:8vh;
+font-size:4vw;
+background:#2196f3;
+color:white;
+border:none;
+}
+
+#confirmBtn:disabled{
+background:#999;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<div id="info">地図をタップして場所を指定</div>
+<div id="panel">
+
+<div id="info" class="box">
+地図をタップして場所を指定
+</div>
+
+<div id="address" class="box">
+住所未選択
+</div>
+
+<button id="confirmBtn" disabled>
+この場所で確定
+</button>
+
+</div>
 
 <div id="map"></div>
 
-<button id="btn" disabled>この場所を送信</button>
+<button id="sendBtn" disabled>
+LINEに送信
+</button>
 
 <script>
 
 const LIFF_ID = "2009188516-g4iIlaf8"
-
 const GOOGLE_API_KEY = "AIzaSyAwkQccxU8_KuOh_fDkv9V-vEbfONHWeMI"
-
 
 let map
 let marker
 let selectedLatLng = null
+let selectedAddress = ""
 
 
 async function init(){
@@ -77,11 +112,9 @@ try{
 
 await liff.init({ liffId: LIFF_ID })
 
-console.log("LIFF OK", liff.isInClient())
-
 }catch(e){
 
-console.log("LIFF outside", e)
+console.log("LIFF outside")
 
 }
 
@@ -102,7 +135,7 @@ gestureHandling:"greedy"
 
 })
 
-map.addListener("click",(e)=>{
+map.addListener("click",async (e)=>{
 
 selectedLatLng = e.latLng
 
@@ -111,14 +144,23 @@ if(marker) marker.setMap(null)
 marker = new google.maps.Marker({
 
 position:selectedLatLng,
-
 map:map
 
 })
 
-document.getElementById("btn").disabled = false
+document.getElementById("info").innerText="住所取得中..."
 
-document.getElementById("info").innerText = "場所を確認して送信してください"
+document.getElementById("confirmBtn").disabled=false
+
+const lat = selectedLatLng.lat()
+const lng = selectedLatLng.lng()
+
+const address = await reverseGeocode(lat,lng)
+
+selectedAddress = address
+
+document.getElementById("address").innerText=address
+document.getElementById("info").innerText="場所を確認して確定してください"
 
 })
 
@@ -129,13 +171,14 @@ async function reverseGeocode(lat,lng){
 
 try{
 
-const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
+const url =
+`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
 
 const res = await fetch(url)
 
 const data = await res.json()
 
-if(data.status !== "OK"){
+if(data.status!=="OK"){
 
 console.log(data)
 
@@ -156,30 +199,33 @@ return "住所取得失敗"
 }
 
 
-document.getElementById("btn").addEventListener("click", async ()=>{
+document.getElementById("confirmBtn").addEventListener("click",()=>{
+
+document.getElementById("info").innerText="この場所で送信できます"
+
+document.getElementById("sendBtn").disabled=false
+
+})
+
+
+document.getElementById("sendBtn").addEventListener("click",async ()=>{
 
 if(!selectedLatLng) return
 
 const lat = selectedLatLng.lat()
-
 const lng = selectedLatLng.lng()
 
-document.getElementById("btn").innerText = "住所取得中..."
-
-const address = await reverseGeocode(lat,lng)
-
 const message =
-`住所: ${address}
+`住所: ${selectedAddress}
 緯度: ${lat}
 経度: ${lng}`
 
 
-if(typeof liff !== "undefined" && liff.isInClient()){
+if(typeof liff!=="undefined" && liff.isInClient()){
 
 await liff.sendMessages([{
 
 type:"text",
-
 text:message
 
 }])
