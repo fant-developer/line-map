@@ -16,7 +16,14 @@ html, body {
 
 #map {
   width:100%;
-  height:85%;
+  height:75%;
+}
+
+#address {
+  height:10%;
+  padding:10px;
+  font-size:14px;
+  background:#f5f5f5;
 }
 
 #btn {
@@ -37,6 +44,11 @@ html, body {
 <body>
 
 <div id="map"></div>
+
+<div id="address">
+地図をタップして場所を選択してください
+</div>
+
 <button id="btn" disabled>この場所を送信</button>
 
 <script>
@@ -59,18 +71,24 @@ function initMap() {
     zoom: 14
   });
 
-  map.addListener("click", (e) => {
+  map.addListener("click", async (e) => {
 
     selectedLatLng = e.latLng;
 
-    if (marker) {
-      marker.setMap(null);
-    }
+    if (marker) marker.setMap(null);
 
     marker = new google.maps.Marker({
       position: selectedLatLng,
       map: map
     });
+
+    const lat = selectedLatLng.lat();
+    const lng = selectedLatLng.lng();
+
+    const address = await reverseGeocode(lat, lng);
+
+    document.getElementById("address").innerText =
+      "住所: " + address;
 
     document.getElementById("btn").disabled = false;
 
@@ -88,8 +106,6 @@ async function reverseGeocode(lat, lng) {
     const res = await fetch(url);
     const data = await res.json();
 
-    console.log("Geocode response:", data);
-
     if (data.status === "OK") {
       return data.results[0].formatted_address;
     }
@@ -99,7 +115,7 @@ async function reverseGeocode(lat, lng) {
   } catch (e) {
 
     console.error(e);
-    return "住所取得失敗 (通信エラー)";
+    return "住所取得失敗";
 
   }
 
@@ -111,7 +127,6 @@ document.getElementById("btn").addEventListener("click", async () => {
 
   const lat = selectedLatLng.lat();
   const lng = selectedLatLng.lng();
-
   const address = await reverseGeocode(lat, lng);
 
   const message =
