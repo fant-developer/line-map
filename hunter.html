@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 <title>依頼番号送信</title>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -16,24 +18,26 @@ html, body {
   background:#f5f5f5;
 }
 
-/* 全体を縦レイアウト */
-.container{
-  display:flex;
-  flex-direction:column;
-  height:100vh;
-}
-
 /* 上部説明 */
 .header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
   background:white;
   padding:10px;
   font-size:0.9rem;
   box-shadow:0 2px 5px rgba(0,0,0,0.2);
+  z-index:10;
 }
 
-/* マップ：残り全部使う */
+/* マップ */
 .map{
-  flex:1;
+  position:absolute;
+  top:50px;
+  bottom:90px;
+  left:0;
+  right:0;
 }
 
 .map iframe{
@@ -42,11 +46,17 @@ html, body {
   border:0;
 }
 
-/* 下部操作 */
+/* 下固定 */
 .footer{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
   background:white;
   padding:10px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
   box-shadow:0 -2px 5px rgba(0,0,0,0.2);
+  z-index:10;
 }
 
 input{
@@ -67,30 +77,27 @@ button{
   border-radius:8px;
 }
 </style>
+
 </head>
 
 <body>
 
-<div class="container">
+<!-- 上 -->
+<div class="header">
+  マップで依頼番号を確認 → 数字のみ入力 → 送信
+</div>
 
-  <!-- 説明 -->
-  <div class="header">
-    マップから依頼番号を確認し、数字のみ入力してください
-  </div>
+<!-- マップ -->
+<div class="map">
+  <iframe 
+    src="https://www.google.com/maps/d/embed?mid=1X9DuXCIVS_AU8hzWkiHASE5pgG21AI8&ehbc=2E312F">
+  </iframe>
+</div>
 
-  <!-- マップ -->
-  <div class="map">
-    <iframe 
-      src="https://www.google.com/maps/d/embed?mid=1X9DuXCIVS_AU8hzWkiHASE5pgG21AI8&ehbc=2E312F">
-    </iframe>
-  </div>
-
-  <!-- 入力 -->
-  <div class="footer">
-    <input id="reqNo" placeholder="例: 123">
-    <button onclick="send()">送信</button>
-  </div>
-
+<!-- 下 -->
+<div class="footer">
+  <input id="reqNo" placeholder="例: 123">
+  <button onclick="send()">送信</button>
 </div>
 
 <script>
@@ -152,6 +159,24 @@ async function send(){
     console.error(e)
   }
 }
+
+/* キーボード対策（重要） */
+function adjustForKeyboard(){
+  if(window.visualViewport){
+    const vv = window.visualViewport
+
+    function update(){
+      const offset = window.innerHeight - vv.height - vv.offsetTop
+      document.querySelector(".footer").style.transform =
+        `translateY(-${offset}px)`
+    }
+
+    vv.addEventListener("resize", update)
+    vv.addEventListener("scroll", update)
+  }
+}
+
+adjustForKeyboard()
 
 </script>
 
