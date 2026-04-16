@@ -2,36 +2,64 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>依頼番号送信</title>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
-body{
+html, body {
+  margin:0;
+  padding:0;
+  height:100%;
   font-family:sans-serif;
   background:#f5f5f5;
-  padding:20px;
 }
 
-.box{
+/* 全体を縦レイアウト */
+.container{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
+
+/* 上部説明 */
+.header{
   background:white;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
+  padding:10px;
+  font-size:0.9rem;
   box-shadow:0 2px 5px rgba(0,0,0,0.2);
-  font-size:1rem;
+}
+
+/* マップ：残り全部使う */
+.map{
+  flex:1;
+}
+
+.map iframe{
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+/* 下部操作 */
+.footer{
+  background:white;
+  padding:10px;
+  box-shadow:0 -2px 5px rgba(0,0,0,0.2);
 }
 
 input{
-  width:98%;
+  width:100%;
   font-size:1.2rem;
   padding:10px;
+  margin-bottom:10px;
+  box-sizing:border-box;
 }
 
 button{
   width:100%;
-  height:60px;
+  height:55px;
   font-size:1.2rem;
   background:#06c755;
   color:white;
@@ -42,23 +70,28 @@ button{
 </head>
 
 <body>
-<div class="box">
-  <iframe 
-    src="https://www.google.com/maps/d/embed?mid=1X9DuXCIVS_AU8hzWkiHASE5pgG21AI8&ehbc=2E312F"
-    width="100%"
-    height="150%"
-    style="border:0;">
-  </iframe>
-</div>
-<div class="box">
-マップから受諾する依頼を確認し、依頼番号の数字部分だけ入力してください。
-</div>
 
-<div class="box">
-<input id="reqNo" placeholder="例: 123">
-</div>
+<div class="container">
 
-<button onclick="send()">送信</button>
+  <!-- 説明 -->
+  <div class="header">
+    マップから依頼番号を確認し、数字のみ入力してください
+  </div>
+
+  <!-- マップ -->
+  <div class="map">
+    <iframe 
+      src="https://www.google.com/maps/d/embed?mid=1X9DuXCIVS_AU8hzWkiHASE5pgG21AI8&ehbc=2E312F">
+    </iframe>
+  </div>
+
+  <!-- 入力 -->
+  <div class="footer">
+    <input id="reqNo" placeholder="例: 123">
+    <button onclick="send()">送信</button>
+  </div>
+
+</div>
 
 <script>
 
@@ -90,11 +123,10 @@ async function send(){
 
   input = normalizeNumber(input)
 
-  // 「依頼No.123」でもOKにする
   const match = input.match(/(\d+)/)
 
   if(!match){
-    alert("数字のみを入力してください")
+    alert("数字のみ入力してください")
     return
   }
 
