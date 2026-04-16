@@ -16,6 +16,7 @@ html, body{
   height:100%;
   font-family:sans-serif;
   background:#f5f5f5;
+  overflow-x:hidden;
 }
 
 /* 上説明 */
@@ -25,7 +26,7 @@ html, body{
   font-size:0.9rem;
 }
 
-/* マップ領域 */
+/* マップ */
 .mapWrap{
   position:relative;
   height:calc(100vh - 60px);
@@ -74,7 +75,7 @@ button{
 
 <body>
 
-<div class="header">
+<div class="header" id="topAnchor">
   マップで依頼番号を確認し、数字のみ入力してください
 </div>
 
@@ -82,7 +83,6 @@ button{
 
   <iframe src="https://www.google.com/maps/d/embed?mid=1X9DuXCIVS_AU8hzWkiHASE5pgG21AI8&ehbc=2E312F"></iframe>
 
-  <!-- フロート -->
   <div class="floating" id="floatingBox">
     <input id="reqNo" placeholder="例: 123">
     <button onclick="send()">送信</button>
@@ -150,7 +150,7 @@ async function send(){
 }
 
 //
-// ▼ キーボード対策（ここ重要）
+// ▼ フロート位置補正（キーボード）
 //
 
 function adjustFloating(){
@@ -169,6 +169,27 @@ function adjustFloating(){
 }
 
 adjustFloating()
+
+//
+// ▼ 上部へ強制スクロール（ここ追加）
+//
+
+const inputEl = document.getElementById("reqNo")
+
+inputEl.addEventListener("focus", () => {
+
+  // iOS対策：少し遅らせる
+  setTimeout(() => {
+
+    // 最上部へ
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    })
+
+  }, 300)
+
+})
 
 </script>
 
