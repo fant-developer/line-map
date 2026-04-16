@@ -3,78 +3,58 @@
 <head>
 
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>依頼番号送信</title>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
-html, body {
+body{
   margin:0;
-  padding:0;
-  height:100%;
   font-family:sans-serif;
   background:#f5f5f5;
 }
 
-/* 上部説明 */
-.header{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
+/* 共通ボックス */
+.box{
   background:white;
-  padding:10px;
-  font-size:0.9rem;
+  padding:12px;
+  margin:10px;
+  border-radius:10px;
   box-shadow:0 2px 5px rgba(0,0,0,0.2);
-  z-index:10;
 }
 
 /* マップ */
 .map{
-  position:absolute;
-  top:50px;
-  bottom:90px;
-  left:0;
-  right:0;
+  height:60vh;
+  margin:10px;
 }
 
 .map iframe{
   width:100%;
   height:100%;
   border:0;
+  border-radius:10px;
 }
 
-/* 下固定 */
-.footer{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:white;
-  padding:10px;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  box-shadow:0 -2px 5px rgba(0,0,0,0.2);
-  z-index:10;
-}
-
+/* 入力 */
 input{
   width:100%;
   font-size:1.2rem;
   padding:10px;
-  margin-bottom:10px;
   box-sizing:border-box;
 }
 
+/* ボタン */
 button{
   width:100%;
-  height:55px;
+  height:60px;
   font-size:1.2rem;
   background:#06c755;
   color:white;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
 }
 </style>
 
@@ -82,21 +62,23 @@ button{
 
 <body>
 
-<!-- 上 -->
-<div class="header">
-  マップで依頼番号を確認し、数字のみ入力して送信してください。
+<!-- ①説明（スクロール基準） -->
+<div id="topAnchor" class="box">
+  マップで依頼番号を確認 → 数字のみ入力 → 送信
 </div>
 
-<!-- マップ -->
+<!-- ②マップ -->
 <div class="map">
-  <iframe 
-    src="https://www.google.com/maps/d/embed?mid=1X9DuXCIVS_AU8hzWkiHASE5pgG21AI8&ehbc=2E312F">
-  </iframe>
+  <iframe src="https://www.google.com/maps/d/embed?mid=1X9DuXCIVS_AU8hzWkiHASE5pgG21AI8&ehbc=2E312F"></iframe>
 </div>
 
-<!-- 下 -->
-<div class="footer">
+<!-- ③入力 -->
+<div class="box">
   <input id="reqNo" placeholder="例: 123">
+</div>
+
+<!-- ④送信 -->
+<div class="box">
   <button onclick="send()">送信</button>
 </div>
 
@@ -156,27 +138,30 @@ async function send(){
 
   }catch(e){
     alert("送信失敗")
-    console.error(e)
   }
 }
 
-/* キーボード対策（重要） */
-function adjustForKeyboard(){
-  if(window.visualViewport){
-    const vv = window.visualViewport
+//
+// ▼ ここが今回のキモ（スクロール制御）
+//
 
-    function update(){
-      const offset = window.innerHeight - vv.height - vv.offsetTop
-      document.querySelector(".footer").style.transform =
-        `translateY(-${offset}px)`
-    }
+const inputEl = document.getElementById("reqNo")
+const anchor = document.getElementById("topAnchor")
 
-    vv.addEventListener("resize", update)
-    vv.addEventListener("scroll", update)
-  }
-}
+inputEl.addEventListener("focus", () => {
+  setTimeout(() => {
+    window.scrollTo({
+      top: anchor.offsetTop,
+      behavior: "smooth"
+    })
+  }, 300)
+})
 
-adjustForKeyboard()
+inputEl.addEventListener("blur", () => {
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, 100)
+})
 
 </script>
 
