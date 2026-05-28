@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>駆除依頼場所の選択</title>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<style>
+html,body{
+margin:0;
+padding:0;
+height:100%;
+font-family:sans-serif;
+background:#f5f5f5;
+}
+
+#map{
+width:100%;
+height:85vh;
+}
+
+#mapWrap{
+position:relative;
+}
+
+#centerPin{
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-100%);
+width:42px;
+height:42px;
+background:#e53935;
+border:4px solid white;
+border-radius:50% 50% 50% 0;
+rotate:-45deg;
+z-index:20;
+pointer-events:none;
+box-shadow:0 4px 10px rgba(0,0,0,0.3);
+}
+
+#centerPin::after{
+content:"";
+position:absolute;
+width:14px;
+height:14px;
+background:white;
+border-radius:50%;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%) rotate(45deg);
+}
+
+#panel{
+position:absolute;
+top:10px;
+left:10px;
+right:10px;
+z-index:10;
+}
+
+.box{
+background:white;
+padding:10px;
+margin-bottom:8px;
+border-radius:8px;
+font-size:clamp(0.8rem, calc(0.5rem + 0.5vw), 1.2rem);
+box-shadow:0 2px 5px rgba(0,0,0,0.2);
+}
+
+#sendBtn{
+width:100%;
+height:9vh;
+font-size:clamp(1rem, 4vw, 2.5rem);
+background:#06c755;
+color:white;
+border:none;
+}
+
+#sendBtn:disabled{
+background:#999;
+}
+
+#confirmBtn{
+width:100%;
+height:7vh;
+font-size:clamp(1rem, 4vw, 2rem);
+background:#2196f3;
+color:white;
+border:none;
+}
+
+#confirmBtn:disabled{
+background:#999;
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="panel">
+
+<div id="info" class="box">
+地図をタップして場所を指定してください
+</div>
+
+<div id="address" class="box">
+住所未選択
+</div>
+
+<button id="confirmBtn" disabled>
+この場所で確定
+</button>
+
+</div>
+
+<div id="mapWrap">
+<div id="map"></div>
+<div id="centerPin"></div>
+</div>
+
+<button id="sendBtn" disabled>
+駆除依頼場所の送信
+</button>
+
+<script>
+
+const LIFF_ID = "2009188516-g4iIlaf8"
+const GOOGLE_API_KEY = "AIzaSyBoyT10gc7UNf9j9SKKp_GRDdS7QNfMYrk"
+
+let map
+let marker
+let geocoder
+let selectedLatLng = null
+let selectedAddress = ""
+let requestId = 0
+
+async function initLiff(){
+try{
+await liff.init({ liffId: LIFF_ID })
+}catch(e){
+console.log("LIFF outside")
+}
+}
+
+function initMap(){
+
+geocoder = new google.maps.Geocoder()
+
+map = new google.maps.Map(document.getElementById("map"),{
+center:{ lat:34.52815856202822 , lng:135.95238437983932 },
+zoom:16,
+gestureHandling:"greedy"
+})
+
+function updateCenterPosition(){
+
+requestId++
+const currentId = requestId
+
+selectedLatLng = map.getCenter()
+
+if(marker) marker.setMap(null)
+
+marker = new google.maps.Marker({
+position:selectedLatLng,
+map:map,
+icon:{
+path:google.maps.SymbolPath.CIRCLE,
+scale:10,
+fillColor:"#e53935",
+fillOpacity:1,
+strokeColor:"#ffffff",
+strokeWeight:3
+}
+})
+
+document.getElementById("info").innerText="住所取得中..."
+document.getElementById("confirmBtn").disabled=false
+
+geocoder.geocode({ location: selectedLatLng }, (results, status)=>{
+
+if(currentId !== requestId) return
+
+if(status === "OK" && results[0]){
+
+selectedAddress = results[0].formatted_address
+
+}else{
+
+const lat = selectedLatLng.lat()
+const lng = selectedLatLng.lng()
+selectedAddress = `緯度:${lat}, 経度:${lng}`
+
+}
+
+document.getElementById("address").innerText = selectedAddress
+document.getElementById("info").innerText="場所を確認して確定してください"
+
+})
+
+}
+
+map.addListener("idle",()=>{
+
+updateCenterPosition()
+
+})
+
+}
+
+)
+
+}
+
+document.getElementById("confirmBtn").addEventListener("click",()=>{
+document.getElementById("info").innerText="この場所で送信できます"
+document.getElementById("sendBtn").disabled=false
+})
+
+document.getElementById("sendBtn").addEventListener("click",async ()=>{
+
+if(!selectedLatLng) return
+
+const lat = selectedLatLng.lat()
+const lng = selectedLatLng.lng()
+
+if(typeof liff!=="undefined" && liff.isInClient()){
+
+await liff.sendMessages([
+{
+type:"text",
+text:"駆除依頼登録をお願いします"
+},
+{
+type:"text",
+text:`住所: ${selectedAddress}\n座標: ${lat} ${lng}`
+}
+])
+
+liff.closeWindow()
+
+}else{
+
+alert(`住所: ${selectedAddress}\n座標: ${lat} ${lng}`)
+
+}
+
+})
+
+initLiff()
+
+</script>
+
+<script async
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoyT10gc7UNf9j9SKKp_GRDdS7QNfMYrk&callback=initMap">
+</script>
+
+</body>
+</html>
