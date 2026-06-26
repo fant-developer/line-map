@@ -314,8 +314,8 @@
             previewLatLng = map.getCenter()
 
             el("info").innerText = isConfirmed
-                ? "確定済み地点は地図上の赤丸です。変更する場合は、中央のピンを変更先に合わせて「依頼場所の変更」を押してください。"
-                : "地図を動かして、中央のピンを依頼場所に合わせてください。"
+                ? "確定済み地点は地図上の赤いポイントです。\n変更する場合は、ピンを変更先に合わせて「依頼場所の変更」を押してください。"
+                : "駆除依頼地点を設定して場所を確定してください。"
 
             el("confirmBtn").innerText = isConfirmed ? "依頼場所の変更" : "この場所で確定"
             el("confirmBtn").disabled = false
@@ -336,8 +336,8 @@
                 renderPlaceBox(previewAddress, previewLatLng.lat(), previewLatLng.lng())
 
                 el("info").innerText = isConfirmed
-                    ? "確定済み地点は地図上の赤丸です。変更する場合は、中央のピンを変更先に合わせて「依頼場所の変更」を押してください。"
-                    : "場所を確認して確定してください。"
+                    ? "確定済み地点は地図上の赤いポイントです。\n変更する場合は、ピンを変更先に合わせて「依頼場所の変更」を押してください。"
+                    : "駆除依頼地点を設定して、場所を確定してください。"
             })
         }
 
