@@ -128,10 +128,26 @@
             color: var(--gray);
         }
 
+        label {
+            display: block;
+            font-weight: 800;
+            margin: 12px 0 6px;
+        }
+
+        select,
         button {
             width: 100%;
             font: inherit;
             border-radius: 10px;
+        }
+
+        select {
+            border: 1px solid var(--border);
+            padding: 12px;
+            background: #fff;
+        }
+
+        button {
             cursor: pointer;
         }
 
@@ -193,6 +209,28 @@
 <body>
 
     <section class="card">
+        <strong class="section-title">駆除依頼内容</strong>
+
+        <label for="targetAnimal">駆除対象動物</label>
+        <select id="targetAnimal">
+            <option value="">選択してください</option>
+            <option value="シカ">シカ</option>
+            <option value="イノシシ">イノシシ</option>
+            <option value="アライグマ">アライグマ</option>
+            <option value="カラスなど鳥類">カラスなど鳥類</option>
+        </select>
+
+        <label for="controlMethod">駆除方法</label>
+        <select id="controlMethod">
+            <option value="">選択してください</option>
+            <option value="指定無し">指定無し</option>
+            <option value="罠猟">罠猟</option>
+            <option value="猟銃">猟銃</option>
+            <option value="網猟">網猟</option>
+        </select>
+    </section>
+
+    <section class="card">
         <strong class="section-title">駆除依頼場所の選択</strong>
         <p id="info" class="description">地図を動かして、中央のピンを駆除依頼場所に合わせてください。住所と座標を確認し、「この場所で確定」を押してください。</p>
 
@@ -211,7 +249,7 @@
     </section>
 
     <div class="footer">
-        <button id="sendBtn" type="button" disabled>駆除依頼場所の送信</button>
+        <button id="sendBtn" type="button" disabled>駆除依頼の送信</button>
     </div>
 
     <script>
@@ -230,6 +268,19 @@
         let isConfirmed = false
 
         const el = (id) => document.getElementById(id)
+
+        function validateForm() {
+            return Boolean(
+                el("targetAnimal").value &&
+                el("controlMethod").value &&
+                confirmedLatLng &&
+                isConfirmed
+            )
+        }
+
+        function updateSendButtonState() {
+            el("sendBtn").disabled = !validateForm()
+        }
 
         async function initLiff() {
             try {
@@ -325,14 +376,20 @@
 
             el("confirmBtn").innerText = "依頼場所の変更"
             el("info").innerText = "この場所で送信できます。変更する場合は、中央のピンを変更先に合わせて「依頼場所の変更」を押してください。"
-            el("sendBtn").disabled = false
+            updateSendButtonState()
         })
 
         el("sendBtn").addEventListener("click", async () => {
-            if (!confirmedLatLng || !isConfirmed) return
+            if (!confirmedLatLng || !isConfirmed || !validateForm()) return
 
+            const animal = el("targetAnimal").value
+            const method = el("controlMethod").value
             const lat = confirmedLatLng.lat()
             const lng = confirmedLatLng.lng()
+            const message = `駆除対象：${animal}
+駆除方法：${method}
+住所：${confirmedAddress}
+座標：${lat}, ${lng}`
 
             if (typeof liff !== "undefined" && liff.isInClient()) {
                 await liff.sendMessages([
@@ -342,13 +399,13 @@
                     },
                     {
                         type: "text",
-                        text: `住所: ${confirmedAddress}\n座標: ${lat} ${lng}`
+                        text: message
                     }
                 ])
 
                 liff.closeWindow()
             } else {
-                alert(`住所: ${confirmedAddress}\n座標: ${lat} ${lng}`)
+                alert(message)
             }
         })
 
@@ -369,6 +426,10 @@
                 .replace(/'/g, "&#039;")
         }
 
+        el("targetAnimal").addEventListener("change", updateSendButtonState)
+        el("controlMethod").addEventListener("change", updateSendButtonState)
+
+        updateSendButtonState()
         initLiff()
         loadGoogleMaps()
     </script>
