@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <title>駆除依頼場所の選択</title>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+    <style>
+        :root {
+            --line: #06c755;
+            --blue: #2196f3;
+            --red: #e53935;
+            --gray: #666;
+            --light: #f5f7fa;
+            --border: #d9dee7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--light);
+            color: #222;
+        }
+
+        body {
+            padding: 10px;
+            padding-bottom: calc(72px + env(safe-area-inset-bottom));
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 1.25rem;
+            line-height: 1.4;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .04);
+        }
+
+        .section-title {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .description {
+            margin: 0 0 12px;
+            color: var(--gray);
+            line-height: 1.6;
+            font-size: .94rem;
+        }
+
+        #mapWrap {
+            position: relative;
+            width: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 56vh;
+            min-height: 320px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #ddd;
+        }
+
+        #centerPin {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -100%) rotate(-45deg);
+            width: 42px;
+            height: 42px;
+            background: var(--red);
+            border: 4px solid #fff;
+            border-radius: 50% 50% 50% 0;
+            z-index: 5;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #centerPin::after {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .place-box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            background: #fafafa;
+            line-height: 1.55;
+            word-break: break-word;
+            font-size: .92rem;
+        }
+
+        .place-title {
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .muted {
+            color: var(--gray);
+        }
+
+        button {
+            width: 100%;
+            font: inherit;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #confirmBtn {
+            margin-top: 10px;
+            padding: 13px 12px;
+            border: none;
+            background: var(--blue);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        #confirmBtn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            background: rgba(255, 255, 255, .96);
+            border-top: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+            z-index: 20;
+        }
+
+        #sendBtn {
+            border: none;
+            background: var(--line);
+            color: #fff;
+            padding: 15px 12px;
+            font-size: 1.08rem;
+            font-weight: 800;
+        }
+
+        #sendBtn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 10px;
+                padding-bottom: calc(102px + env(safe-area-inset-bottom));
+            }
+
+            #map {
+                height: 54vh;
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="card">
+        <strong class="section-title">駆除依頼場所の選択</strong>
+        <p id="info" class="description">地図を動かして、中央のピンを駆除依頼場所に合わせてください。住所と座標を確認し、「この場所で確定」を押してください。</p>
+
+        <div id="mapWrap">
+            <div id="map"></div>
+            <div id="centerPin"></div>
+        </div>
+
+        <div id="placeBox" class="place-box">
+            <div class="place-title">選択場所</div>
+            <div class="muted">住所：未選択</div>
+            <div class="muted">座標：未選択</div>
+        </div>
+
+        <button id="confirmBtn" type="button" disabled>この場所で確定</button>
+    </section>
+
+    <div class="footer">
+        <button id="sendBtn" type="button" disabled>駆除依頼場所の送信</button>
+    </div>
+
+    <script>
+        const LIFF_ID = "2009188516-g4iIlaf8"
+        const GOOGLE_API_KEY = "AIzaSyBoyT10gc7UNf9j9SKKp_GRDdS7QNfMYrk"
+        const DEFAULT_CENTER = { lat: 34.52815856202822, lng: 135.95238437983932 }
+
+        let map
+        let marker
+        let geocoder
+        let selectedLatLng = null
+        let selectedAddress = ""
+        let requestId = 0
+        let isConfirmed = false
+
+        const el = (id) => document.getElementById(id)
+
+        async function initLiff() {
+            try {
+                await liff.init({ liffId: LIFF_ID })
+            } catch (e) {
+                console.log("LIFF outside")
+            }
+        }
+
+        window.initMap = function initMap() {
+            geocoder = new google.maps.Geocoder()
+
+            map = new google.maps.Map(el("map"), {
+                center: DEFAULT_CENTER,
+                zoom: 16,
+                gestureHandling: "greedy",
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
+            })
+
+            map.addListener("idle", () => {
+                updateCenterPosition()
+            })
+        }
+
+        function updateCenterPosition() {
+            requestId += 1
+            const currentId = requestId
+
+            selectedLatLng = map.getCenter()
+            isConfirmed = false
+            el("confirmBtn").innerText = "この場所で確定"
+            el("sendBtn").disabled = true
+
+            if (marker) marker.setMap(null)
+
+            marker = new google.maps.Marker({
+                position: selectedLatLng,
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: "#e53935",
+                    fillOpacity: 1,
+                    strokeColor: "#ffffff",
+                    strokeWeight: 3
+                }
+            })
+
+            el("info").innerText = "地図をタップして場所を指定してください"
+            el("confirmBtn").disabled = false
+            renderPlaceBox("住所取得中...", selectedLatLng.lat(), selectedLatLng.lng())
+
+            geocoder.geocode({ location: selectedLatLng }, (results, status) => {
+                if (currentId !== requestId) return
+
+                if (status === "OK" && results[0]) {
+                    selectedAddress = results[0].formatted_address
+                } else {
+                    const lat = selectedLatLng.lat()
+                    const lng = selectedLatLng.lng()
+                    selectedAddress = `緯度:${lat}, 経度:${lng}`
+                }
+
+                renderPlaceBox(selectedAddress, selectedLatLng.lat(), selectedLatLng.lng())
+                el("info").innerText = "場所を確認して確定してください。"
+            })
+        }
+
+        function renderPlaceBox(address, lat, lng) {
+            el("placeBox").innerHTML = `
+                <div class="place-title">選択場所</div>
+                <div>住所：${escapeHtml(address)}</div>
+                <div>座標：${Number(lat).toFixed(8)}, ${Number(lng).toFixed(8)}</div>
+            `
+        }
+
+        el("confirmBtn").addEventListener("click", () => {
+            if (!selectedLatLng) return
+
+            if (isConfirmed) {
+                isConfirmed = false
+                el("confirmBtn").innerText = "この場所で確定"
+                el("info").innerText = "地図を動かして依頼場所を変更してください。"
+                el("sendBtn").disabled = true
+                return
+            }
+
+            isConfirmed = true
+            el("confirmBtn").innerText = "依頼場所の変更"
+            el("info").innerText = "この場所で送信できます。依頼場所を変更する場合、変更先ポイントをタップ後、「依頼場所の変更」ボタンで変更してください。"
+            el("sendBtn").disabled = false
+        })
+
+        el("sendBtn").addEventListener("click", async () => {
+            if (!selectedLatLng || !isConfirmed) return
+
+            const lat = selectedLatLng.lat()
+            const lng = selectedLatLng.lng()
+
+            if (typeof liff !== "undefined" && liff.isInClient()) {
+                await liff.sendMessages([
+                    {
+                        type: "text",
+                        text: "駆除依頼登録をお願いします"
+                    },
+                    {
+                        type: "text",
+                        text: `住所: ${selectedAddress}\n座標: ${lat} ${lng}`
+                    }
+                ])
+
+                liff.closeWindow()
+            } else {
+                alert(`住所: ${selectedAddress}\n座標: ${lat} ${lng}`)
+            }
+        })
+
+        function loadGoogleMaps() {
+            const script = document.createElement("script")
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&callback=initMap`
+            script.async = true
+            script.defer = true
+            document.head.appendChild(script)
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;")
+        }
+
+        initLiff()
+        loadGoogleMaps()
+    </script>
+</body>
+
+</html>
