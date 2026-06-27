@@ -208,8 +208,8 @@
 
 <body>
 
+    <strong class="section-title">駆除依頼内容</strong>
     <section class="card">
-        <strong class="section-title">駆除依頼内容</strong>
 
         <label for="targetAnimal">駆除対象動物</label>
         <select id="targetAnimal">
@@ -218,6 +218,7 @@
             <option value="イノシシ">イノシシ</option>
             <option value="アライグマ">アライグマ</option>
             <option value="カラスなど鳥類">カラスなど鳥類</option>
+            <option value="その他の動物">その他の動物（別途、対象動物の確認をします）</option>
         </select>
 
         <label for="controlMethod">駆除方法</label>
@@ -227,6 +228,14 @@
             <option value="罠猟">罠猟</option>
             <option value="猟銃">猟銃</option>
             <option value="網猟">網猟</option>
+        </select>
+
+        <label for="hunterSupport">協力可能事項</label>
+        <select id="hunterSupport">
+            <option value="">選択してください</option>
+            <option value="特になし">特になし</option>
+            <option value="餌の追加">餌の追加</option>
+            <option value="罠の確認">罠の確認</option>
         </select>
     </section>
 
@@ -273,6 +282,7 @@
             return Boolean(
                 el("targetAnimal").value &&
                 el("controlMethod").value &&
+                el("hunterSupport").value &&
                 confirmedLatLng &&
                 isConfirmed
             )
@@ -384,10 +394,12 @@
 
             const animal = el("targetAnimal").value
             const method = el("controlMethod").value
+            const hunterSupport = el("hunterSupport").value
             const lat = confirmedLatLng.lat()
             const lng = confirmedLatLng.lng()
             const message = `駆除対象：${animal}
 駆除方法：${method}
+ハンターへの協力可能事項：${hunterSupport}
 住所：${confirmedAddress}
 座標：${lat}, ${lng}`
 
@@ -428,6 +440,7 @@
 
         el("targetAnimal").addEventListener("change", updateSendButtonState)
         el("controlMethod").addEventListener("change", updateSendButtonState)
+        el("hunterSupport").addEventListener("change", updateSendButtonState)
 
         updateSendButtonState()
         initLiff()
