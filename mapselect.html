@@ -311,8 +311,7 @@
                     position: previewLatLng,
                     map: map,
                     icon: {
-                        path: "M 0,-42 C -11,-42 -20,-33 -20,-22 C -20,-7 0,0 0,0 C 0,0 20,-7 20,-22 C 20,-33 11,-42 0,-42 Z M 0,-30 A 8,8 0 1,0 0,-14 A 8,8 0 1,0 0,-30",
-                        fillColor: "#e53935",
+                        path: "M 0,-42 C -10,-42 -17,-33 -17,-22 C -17,-7 0,14 0,14 C 0,14 17,-7 17,-22 C 17,-33 10,-42 0,-42 Z M 0,-30 A 7,7 0 1,0 0,-16 A 7,7 0 1,0 0,-30", fillColor: "#e53935",
                         fillOpacity: 1,
                         strokeColor: "#ffffff",
                         strokeWeight: 3,
@@ -380,8 +379,12 @@
                 confirmedMarker.setMap(map)
             }
 
+            if (previewMarker) {
+                previewMarker.setMap(null)
+            }
+
             el("confirmBtn").innerText = "依頼場所の変更"
-            el("info").innerText = "この場所で送信できます。変更する場合は、地図上の変更先をタップして赤いピンを移動し、再度確定してください。"
+            el("info").innerText = "この場所で送信できます。変更する場合は、ピンを移動してから再度確定してください。"
             renderPlaceBox(confirmedAddress, confirmedLatLng.lat(), confirmedLatLng.lng())
             updateSendButtonState()
         })
