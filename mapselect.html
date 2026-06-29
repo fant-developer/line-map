@@ -82,30 +82,7 @@
         }
 
         #centerPin {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -100%) rotate(-45deg);
-            width: 42px;
-            height: 42px;
-            background: var(--red);
-            border: 4px solid #fff;
-            border-radius: 50% 50% 50% 0;
-            z-index: 5;
-            pointer-events: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        #centerPin::after {
-            content: "";
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            background: #fff;
-            border-radius: 50%;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
+            display: none;
         }
 
         .place-box {
@@ -241,11 +218,10 @@
 
     <section class="card">
         <strong class="section-title">駆除依頼場所の選択</strong>
-        <p id="info" class="description">駆除依頼地点を設定して、場所を確定してください。</p>
+        <p id="info" class="description">地図上の駆除依頼地点をタップして、場所を確定してください。</p>
 
         <div id="mapWrap">
             <div id="map"></div>
-            <div id="centerPin"></div>
         </div>
 
         <button id="confirmBtn" type="button" disabled>この場所で確定</button>
@@ -305,31 +281,52 @@
 
             map = new google.maps.Map(el("map"), {
                 center: DEFAULT_CENTER,
-                zoom: 13,
+                zoom: 16,
                 gestureHandling: "greedy",
                 mapTypeControl: false,
                 streetViewControl: false,
                 fullscreenControl: false
             })
 
-            map.addListener("idle", () => {
-                updateCenterPosition()
+            map.addListener("click", (event) => {
+                selectLocation(event.latLng)
             })
+
+            el("info").innerText = "地図上の駆除依頼地点をタップしてください。"
         }
 
-        function updateCenterPosition() {
+        function selectLocation(latLng) {
             requestId += 1
             const currentId = requestId
 
-            previewLatLng = map.getCenter()
+            previewLatLng = latLng
+            previewAddress = ""
+            isConfirmed = false
+            confirmedLatLng = null
+            confirmedAddress = ""
 
-            el("info").innerText = isConfirmed
-                ? "確定済み地点は地図上の赤いポイントです。\n変更する場合は、ピンを変更先に合わせて「依頼場所の変更」を押してください。"
-                : "駆除依頼地点を設定して、場所を確定してください。"
+            if (!marker) {
+                marker = new google.maps.Marker({
+                    position: previewLatLng,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: "#e53935",
+                        fillOpacity: 1,
+                        strokeColor: "#ffffff",
+                        strokeWeight: 3
+                    }
+                })
+            } else {
+                marker.setPosition(previewLatLng)
+                marker.setMap(map)
+            }
 
-            el("confirmBtn").innerText = isConfirmed ? "依頼場所の変更" : "この場所で確定"
+            el("info").innerText = "住所取得中です。"
+            el("confirmBtn").innerText = "この場所で確定"
             el("confirmBtn").disabled = false
-
+            updateSendButtonState()
             renderPlaceBox("住所取得中...", previewLatLng.lat(), previewLatLng.lng())
 
             geocoder.geocode({ location: previewLatLng }, (results, status) => {
@@ -344,10 +341,7 @@
                 }
 
                 renderPlaceBox(previewAddress, previewLatLng.lat(), previewLatLng.lng())
-
-                el("info").innerText = isConfirmed
-                    ? "確定済み地点は地図上の赤いポイントです。\n変更する場合は、ピンを変更先に合わせて「依頼場所の変更」を押してください。"
-                    : "駆除依頼地点を設定して、場所を確定してください。"
+                el("info").innerText = "場所を確認して確定してください。"
             })
         }
 
@@ -366,26 +360,14 @@
             confirmedAddress = previewAddress
             isConfirmed = true
 
-            if (!marker) {
-                marker = new google.maps.Marker({
-                    position: confirmedLatLng,
-                    map: map,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 10,
-                        fillColor: "#e53935",
-                        fillOpacity: 1,
-                        strokeColor: "#ffffff",
-                        strokeWeight: 3
-                    }
-                })
-            } else {
+            if (marker) {
                 marker.setPosition(confirmedLatLng)
                 marker.setMap(map)
             }
 
             el("confirmBtn").innerText = "依頼場所の変更"
-            el("info").innerText = "この場所で送信できます。変更する場合は、中央のピンを変更先に合わせて「依頼場所の変更」を押してください。"
+            el("info").innerText = "この場所で送信できます。変更する場合は、地図上の変更先をタップして再度確定してください。"
+            renderPlaceBox(confirmedAddress, confirmedLatLng.lat(), confirmedLatLng.lng())
             updateSendButtonState()
         })
 
