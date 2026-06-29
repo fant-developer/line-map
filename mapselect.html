@@ -380,10 +380,6 @@
                 confirmedMarker.setMap(map)
             }
 
-            if (previewMarker) {
-                previewMarker.setMap(null)
-            }
-
             el("confirmBtn").innerText = "依頼場所の変更"
             el("info").innerText = "この場所で送信できます。変更する場合は、地図上の変更先をタップして赤いピンを移動し、再度確定してください。"
             renderPlaceBox(confirmedAddress, confirmedLatLng.lat(), confirmedLatLng.lng())
