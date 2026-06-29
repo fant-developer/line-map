@@ -311,7 +311,7 @@
                     position: previewLatLng,
                     map: map,
                     icon: {
-                        path: "M 0,-42 C -10,-42 -17,-33 -17,-22 C -17,-7 0,14 0,14 C 0,14 17,-7 17,-22 C 17,-33 10,-42 0,-42 Z M 0,-30 A 7,7 0 1,0 0,-16 A 7,7 0 1,0 0,-30", fillColor: "#e53935",
+                        path: "M 0,-42 C -11,-42 -20,-33 -20,-22 C -20,-7 0,8 0,8 C 0,8 20,-7 20,-22 C 20,-33 11,-42 0,-42 Z M 0,-30 A 8,8 0 1,0 0,-14 A 8,8 0 1,0 0,-30",
                         fillOpacity: 1,
                         strokeColor: "#ffffff",
                         strokeWeight: 3,
@@ -377,10 +377,6 @@
             } else {
                 confirmedMarker.setPosition(confirmedLatLng)
                 confirmedMarker.setMap(map)
-            }
-
-            if (previewMarker) {
-                previewMarker.setMap(null)
             }
 
             el("confirmBtn").innerText = "依頼場所の変更"
