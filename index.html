@@ -1,214 +1,448 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
+
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>駆除依頼場所の選択</title>
 
-<title>駆除依頼場所の選択</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        :root {
+            --line: #06c755;
+            --blue: #2196f3;
+            --red: #e53935;
+            --gray: #666;
+            --light: #f5f7fa;
+            --border: #d9dee7;
+        }
 
-<style>
-html,body{
-margin:0;
-padding:0;
-height:100%;
-font-family:sans-serif;
-background:#f5f5f5;
-}
+        * {
+            box-sizing: border-box;
+        }
 
-#map{
-width:100%;
-height:85vh;
-}
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--light);
+            color: #222;
+        }
 
-#panel{
-position:absolute;
-top:10px;
-left:10px;
-right:10px;
-z-index:10;
-}
+        body {
+            padding: 10px;
+            padding-bottom: calc(72px + env(safe-area-inset-bottom));
+        }
 
-.box{
-background:white;
-padding:10px;
-margin-bottom:8px;
-border-radius:8px;
-font-size:clamp(0.8rem, calc(0.5rem + 0.5vw), 1.2rem);
-box-shadow:0 2px 5px rgba(0,0,0,0.2);
-}
+        h1 {
+            margin: 0 0 12px;
+            font-size: 1.25rem;
+            line-height: 1.4;
+        }
 
-#sendBtn{
-width:100%;
-height:9vh;
-font-size:clamp(1rem, 4vw, 2.5rem);
-background:#06c755;
-color:white;
-border:none;
-}
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .04);
+        }
 
-#sendBtn:disabled{
-background:#999;
-}
+        .section-title {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
 
-#confirmBtn{
-width:100%;
-height:7vh;
-font-size:clamp(1rem, 4vw, 2rem);
-background:#2196f3;
-color:white;
-border:none;
-}
+        .description {
+            margin: 0 0 12px;
+            color: var(--gray);
+            line-height: 1.6;
+            font-size: .94rem;
+        }
 
-#confirmBtn:disabled{
-background:#999;
-}
-</style>
+        #mapWrap {
+            position: relative;
+            width: 100%;
+        }
 
+        #map {
+            width: 100%;
+            height: 65vh;
+            min-height: 320px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #ddd;
+        }
+
+        #centerPin {
+            display: none;
+        }
+
+        .place-box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            background: #fafafa;
+            line-height: 1.55;
+            word-break: break-word;
+            font-size: .92rem;
+        }
+
+        .place-title {
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .muted {
+            color: var(--gray);
+        }
+
+        label {
+            display: block;
+            font-weight: 800;
+            margin: 12px 0 6px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            font: inherit;
+            border-radius: 10px;
+        }
+
+        select {
+            border: 1px solid var(--border);
+            padding: 12px;
+            background: #fff;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #confirmBtn {
+            margin-top: 10px;
+            padding: 13px 12px;
+            border: none;
+            background: var(--blue);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        #confirmBtn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            background: rgba(255, 255, 255, .96);
+            border-top: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+            z-index: 20;
+        }
+
+        #sendBtn {
+            border: none;
+            background: var(--line);
+            color: #fff;
+            padding: 15px 12px;
+            font-size: 1.08rem;
+            font-weight: 800;
+        }
+
+        #sendBtn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 10px;
+                padding-bottom: calc(102px + env(safe-area-inset-bottom));
+            }
+
+            #map {
+                height: 54vh;
+                min-height: 300px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div id="panel">
+    <strong class="section-title">駆除依頼内容</strong>
+    <section class="card">
 
-<div id="info" class="box">
-地図をタップして場所を指定してください
-</div>
+        <label for="targetAnimal">駆除対象動物</label>
+        <select id="targetAnimal">
+            <option value="">選択してください</option>
+            <option value="シカ">シカ</option>
+            <option value="イノシシ">イノシシ</option>
+            <option value="アライグマ">アライグマ</option>
+            <option value="カラスなど鳥類">カラスなど鳥類</option>
+            <option value="その他の動物">その他の動物（別途、対象動物の確認をします）</option>
+        </select>
 
-<div id="address" class="box">
-住所未選択
-</div>
+        <label for="controlMethod">駆除方法</label>
+        <select id="controlMethod">
+            <option value="">選択してください</option>
+            <option value="指定無し">指定無し</option>
+            <option value="罠猟">罠猟</option>
+            <option value="猟銃">猟銃</option>
+            <option value="網猟">網猟</option>
+        </select>
 
-<button id="confirmBtn" disabled>
-この場所で確定
-</button>
+        <label for="hunterSupport">協力可能事項</label>
+        <select id="hunterSupport">
+            <option value="">選択してください</option>
+            <option value="特になし">特になし</option>
+            <option value="餌の追加">餌の追加</option>
+            <option value="罠の確認">罠の確認</option>
+        </select>
+    </section>
 
-</div>
+    <section class="card">
+        <strong class="section-title">駆除依頼場所の選択</strong>
+        <p id="info" class="description">地図上の駆除依頼地点をタップして、場所を確定してください。</p>
 
-<div id="map"></div>
+        <div id="mapWrap">
+            <div id="map"></div>
+        </div>
 
-<button id="sendBtn" disabled>
-駆除依頼場所の送信
-</button>
+        <button id="confirmBtn" type="button" disabled>この場所で確定</button>
 
-<script>
+        <div id="placeBox" class="place-box">
+            <div class="place-title">選択場所</div>
+            <div class="muted">住所：未選択</div>
+            <div class="muted">座標：未選択</div>
+        </div>
+    </section>
 
-const LIFF_ID = "2009188516-g4iIlaf8"
-const GOOGLE_API_KEY = "AIzaSyBoyT10gc7UNf9j9SKKp_GRDdS7QNfMYrk"
+    <div class="footer">
+        <button id="sendBtn" type="button" disabled>駆除依頼の送信</button>
+    </div>
 
-let map
-let marker
-let geocoder
-let selectedLatLng = null
-let selectedAddress = ""
-let requestId = 0
+    <script>
+        const LIFF_ID = "2009188516-g4iIlaf8"
+        const GOOGLE_API_KEY = "AIzaSyBoyT10gc7UNf9j9SKKp_GRDdS7QNfMYrk"
+        const DEFAULT_CENTER = { lat: 34.52815856202822, lng: 135.95238437983932 }
 
-async function initLiff(){
-try{
-await liff.init({ liffId: LIFF_ID })
-}catch(e){
-console.log("LIFF outside")
-}
-}
+        let map
+        let previewMarker
+        let confirmedMarker
+        let geocoder
+        let previewLatLng = null
+        let previewAddress = ""
+        let confirmedLatLng = null
+        let confirmedAddress = ""
+        let requestId = 0
+        let isConfirmed = false
 
-function initMap(){
+        const el = (id) => document.getElementById(id)
 
-geocoder = new google.maps.Geocoder()
+        function validateForm() {
+            return Boolean(
+                el("targetAnimal").value &&
+                el("controlMethod").value &&
+                el("hunterSupport").value &&
+                confirmedLatLng &&
+                isConfirmed
+            )
+        }
 
-map = new google.maps.Map(document.getElementById("map"),{
-center:{ lat:34.52815856202822 , lng:135.95238437983932 },
-zoom:16,
-gestureHandling:"greedy"
-})
+        function updateSendButtonState() {
+            el("sendBtn").disabled = !validateForm()
+        }
 
-map.addListener("click",(e)=>{
+        async function initLiff() {
+            try {
+                await liff.init({ liffId: LIFF_ID })
+            } catch (e) {
+                console.log("LIFF outside")
+            }
+        }
 
-requestId++
-const currentId = requestId
+        window.initMap = function initMap() {
+            geocoder = new google.maps.Geocoder()
 
-selectedLatLng = e.latLng
+            map = new google.maps.Map(el("map"), {
+                center: DEFAULT_CENTER,
+                zoom: 16,
+                gestureHandling: "greedy",
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
+            })
 
-if(marker) marker.setMap(null)
+            map.addListener("click", (event) => {
+                selectLocation(event.latLng)
+            })
 
-marker = new google.maps.Marker({
-position:selectedLatLng,
-map:map
-})
+            el("info").innerText = "地図上の駆除依頼地点をタップしてください。"
+        }
 
-document.getElementById("info").innerText="住所取得中..."
-document.getElementById("confirmBtn").disabled=false
+        function selectLocation(latLng) {
+            requestId += 1
+            const currentId = requestId
 
-geocoder.geocode({ location: selectedLatLng }, (results, status)=>{
+            previewLatLng = latLng
+            previewAddress = ""
+            isConfirmed = false
+            confirmedLatLng = null
+            confirmedAddress = ""
 
-// 古いレスポンス無視
-if(currentId !== requestId) return
+            if (!previewMarker) {
+                previewMarker = new google.maps.Marker({
+                    position: previewLatLng,
+                    map: map,
+                    icon: {
+                        path: "M 0,-42 C -11,-42 -20,-33 -20,-22 C -20,-7 0,8 0,8 C 0,8 20,-7 20,-22 C 20,-33 11,-42 0,-42 Z M 0,-30 A 8,8 0 1,0 0,-14 A 8,8 0 1,0 0,-30",
+                        fillColor: "#e53935",
+                        fillOpacity: 1,
+                        strokeColor: "#ffffff",
+                        strokeWeight: 3,
+                        scale: 1,
+                        anchor: new google.maps.Point(0, 0)
+                    }
+                })
+            } else {
+                previewMarker.setPosition(previewLatLng)
+                previewMarker.setMap(map)
+            }
 
-if(status === "OK" && results[0]){
+            el("info").innerText = "住所取得中です。"
+            el("confirmBtn").innerText = "この場所で確定"
+            el("confirmBtn").disabled = false
+            updateSendButtonState()
+            renderPlaceBox("住所取得中...", previewLatLng.lat(), previewLatLng.lng())
 
-selectedAddress = results[0].formatted_address
+            geocoder.geocode({ location: previewLatLng }, (results, status) => {
+                if (currentId !== requestId) return
 
-}else{
+                if (status === "OK" && results[0]) {
+                    previewAddress = results[0].formatted_address
+                } else {
+                    const lat = previewLatLng.lat()
+                    const lng = previewLatLng.lng()
+                    previewAddress = `緯度:${lat}, 経度:${lng}`
+                }
 
-// フォールバック
-const lat = selectedLatLng.lat()
-const lng = selectedLatLng.lng()
-selectedAddress = `緯度:${lat}, 経度:${lng}`
+                renderPlaceBox(previewAddress, previewLatLng.lat(), previewLatLng.lng())
+                el("info").innerText = "赤いピンの場所を確認して確定してください。"
+            })
+        }
 
-}
+        function renderPlaceBox(address, lat, lng) {
+            el("placeBox").innerHTML = `
+                <div class="place-title">選択場所</div>
+                <div>住所：${escapeHtml(address)}</div>
+                <div>座標：${Number(lat).toFixed(8)}, ${Number(lng).toFixed(8)}</div>
+            `
+        }
 
-document.getElementById("address").innerText = selectedAddress
-document.getElementById("info").innerText="場所を確認して確定してください"
+        el("confirmBtn").addEventListener("click", () => {
+            if (!previewLatLng) return
 
-})
+            confirmedLatLng = previewLatLng
+            confirmedAddress = previewAddress
+            isConfirmed = true
 
-})
+            if (!confirmedMarker) {
+                confirmedMarker = new google.maps.Marker({
+                    position: confirmedLatLng,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: "#e53935",
+                        fillOpacity: 1,
+                        strokeColor: "#ffffff",
+                        strokeWeight: 3
+                    }
+                })
+            } else {
+                confirmedMarker.setPosition(confirmedLatLng)
+                confirmedMarker.setMap(map)
+            }
 
-}
+            el("confirmBtn").innerText = "依頼場所の変更"
+            el("info").innerText = "この場所で送信できます。変更する場合は、ピンを移動してから再度確定してください。"
+            renderPlaceBox(confirmedAddress, confirmedLatLng.lat(), confirmedLatLng.lng())
+            updateSendButtonState()
+        })
 
-document.getElementById("confirmBtn").addEventListener("click",()=>{
-document.getElementById("info").innerText="この場所で送信できます"
-document.getElementById("sendBtn").disabled=false
-})
+        el("sendBtn").addEventListener("click", async () => {
+            if (!confirmedLatLng || !isConfirmed || !validateForm()) return
 
-document.getElementById("sendBtn").addEventListener("click",async ()=>{
+            const animal = el("targetAnimal").value
+            const method = el("controlMethod").value
+            const hunterSupport = el("hunterSupport").value
+            const lat = confirmedLatLng.lat()
+            const lng = confirmedLatLng.lng()
+            const message = `駆除対象：${animal}
+駆除方法：${method}
+ハンターへの協力可能事項：${hunterSupport}
+住所：${confirmedAddress}
+座標：${lat}, ${lng}`
 
-if(!selectedLatLng) return
+            if (typeof liff !== "undefined" && liff.isInClient()) {
+                await liff.sendMessages([
+                    {
+                        type: "text",
+                        text: "駆除依頼登録をお願いします"
+                    },
+                    {
+                        type: "text",
+                        text: message
+                    }
+                ])
 
-const lat = selectedLatLng.lat()
-const lng = selectedLatLng.lng()
+                liff.closeWindow()
+            } else {
+                alert(message)
+            }
+        })
 
-if(typeof liff!=="undefined" && liff.isInClient()){
+        function loadGoogleMaps() {
+            const script = document.createElement("script")
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&callback=initMap`
+            script.async = true
+            script.defer = true
+            document.head.appendChild(script)
+        }
 
-await liff.sendMessages([
-{
-type:"text",
-text:"駆除依頼登録をお願いします"
-},
-{
-type:"text",
-text:`住所: ${selectedAddress}\n座標: ${lat} ${lng}`
-}
-])
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;")
+        }
 
-liff.closeWindow()
+        el("targetAnimal").addEventListener("change", updateSendButtonState)
+        el("controlMethod").addEventListener("change", updateSendButtonState)
+        el("hunterSupport").addEventListener("change", updateSendButtonState)
 
-}else{
-
-alert(`住所: ${selectedAddress}\n座標: ${lat} ${lng}`)
-
-}
-
-})
-
-initLiff()
-
-</script>
-
-<script async
-src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoyT10gc7UNf9j9SKKp_GRDdS7QNfMYrk&callback=initMap">
-</script>
-
+        updateSendButtonState()
+        initLiff()
+        loadGoogleMaps()
+    </script>
 </body>
+
 </html>
