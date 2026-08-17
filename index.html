@@ -5,6 +5,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>駆除依頼場所の選択</title>
+
+    <div id="appDialogBackdrop" class="app-dialog-backdrop" role="dialog" aria-modal="true"
+        aria-labelledby="appDialogMessage">
+        <div class="app-dialog">
+            <div id="appDialogMessage" class="app-dialog-message"></div>
+            <div class="app-dialog-actions">
+                <button id="appDialogOk" type="button" class="app-dialog-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
     <style>
@@ -286,6 +297,57 @@
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
+
+        /* 独自メッセージダイアログ */
+        .app-dialog-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(0, 0, 0, .42);
+        }
+
+        .app-dialog-backdrop.show {
+            display: flex;
+        }
+
+        .app-dialog {
+            width: min(100%, 360px);
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, .24);
+            overflow: hidden;
+        }
+
+        .app-dialog-message {
+            padding: 24px 20px 20px;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #222;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .app-dialog-actions {
+            border-top: 1px solid #e5e5e5;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        .app-dialog-ok {
+            min-width: 120px;
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 24px;
+            background: #06c755;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -355,8 +417,6 @@
         const GOOGLE_API_KEY = "AIzaSyBoyT10gc7UNf9j9SKKp_GRDdS7QNfMYrk"
         const DEFAULT_CENTER = {lat: 34.52815856202822, lng: 135.95238437983932}
 
-        // GAS Webアプリを作成後、/exec で終わるURLを設定してください。
-        // 例: https://script.google.com/macros/s/XXXXXXXXXXXXXXXX/exec
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwq2AHcWVtLxK2aNIw_tBeaxEuM_-D_7gdRvgdUUkRW75ng-kglyN_jkPFEFo71b-43ng/exec"
 
         const DRIVE_ROOT_FOLDER_NAME = "宇陀市駆除依頼"
@@ -515,7 +575,7 @@
             if (!incoming.length) return
 
             if (selectedPhotos.length + incoming.length > MAX_PHOTOS) {
-                showPhotoNotice(`写真は最大${MAX_PHOTOS}枚までです。`, true)
+                showPhotoNotice(`登録できる写真は最大${MAX_PHOTOS}枚までです。`, true)
                 return
             }
 
@@ -601,8 +661,28 @@
             })
         }
 
+
+        function showAppDialog(message) {
+            const backdrop = document.getElementById("appDialogBackdrop")
+            const messageEl = document.getElementById("appDialogMessage")
+            const okButton = document.getElementById("appDialogOk")
+
+            messageEl.innerText = String(message || "")
+            backdrop.classList.add("show")
+
+            return new Promise(resolve => {
+                const close = () => {
+                    backdrop.classList.remove("show")
+                    okButton.removeEventListener("click", close)
+                    resolve()
+                }
+                okButton.addEventListener("click", close)
+                setTimeout(() => okButton.focus(), 0)
+            })
+        }
+
         function showPhotoNotice(text, isError) {
-            if (isError) alert(text)
+            if (isError) showAppDialog(text)
         }
 
         function createRequestNo() {
@@ -673,18 +753,28 @@
         async function uploadPhotosToDrive(payload) {
             if (!selectedPhotos.length) return {skipped: true}
             if (!GAS_WEB_APP_URL) {
-                throw new Error("GAS_WEB_APP_URL が未設定です。Drive保存用GASのURLを設定してください。")
+                // ER-001: クライアント側にGAS WebアプリURLが設定されていない。
+                throw new Error("アップロードに失敗しました（エラーコード：ER-001）")
             }
 
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: "POST",
-                headers: {"Content-Type": "text/plain;charset=utf-8"},
-                body: JSON.stringify(payload),
-                redirect: "follow"
-            })
+            let response
+            try {
+                response = await fetch(GAS_WEB_APP_URL, {
+                    method: "POST",
+                    headers: {"Content-Type": "text/plain;charset=utf-8"},
+                    body: JSON.stringify(payload),
+                    redirect: "follow"
+                })
+            } catch (e) {
+                // ER-004: ネットワーク断・CORS・GAS到達不能などfetch自体が失敗した。
+                console.error("ER-004 upload fetch error", e)
+                throw new Error("アップロードに失敗しました（エラーコード：ER-004）")
+            }
 
             if (!response.ok) {
-                throw new Error(`Driveアップロードに失敗しました（HTTP ${response.status}）`)
+                // ER-002: GAS WebアプリへのHTTP通信が正常終了しなかった。
+                console.error("ER-002 upload HTTP error", response.status)
+                throw new Error("アップロードに失敗しました（エラーコード：ER-002）")
             }
 
             const text = await response.text()
@@ -692,10 +782,14 @@
             try {
                 result = JSON.parse(text)
             } catch {
-                throw new Error("Drive保存APIから正しい応答を取得できませんでした。")
+                // ER-003: GASからJSONとして解釈できる応答が返らなかった。
+                throw new Error("アップロードに失敗しました（エラーコード：ER-003）")
             }
             if (!result.ok) {
-                throw new Error(result.message || "Drive保存に失敗しました。")
+                // GAS側が返したER-1xx系コードを表示。未分類の場合はER-199。
+                const serverCode = result.errorCode || "ER-199"
+                console.error("Server upload error", serverCode, result.message || "")
+                throw new Error(`アップロードに失敗しました（エラーコード：${serverCode}）`)
             }
             return result
         }
@@ -715,12 +809,12 @@
                 const lng = confirmedLatLng.lng()
 
                 if (selectedPhotos.length) {
-                    el("sendStatus").innerText = `写真 ${selectedPhotos.length}枚をDriveへ保存中...`
+                    el("sendStatus").innerText = "写真をアップロード中..."
                     const payload = await buildUploadPayload(requestNo)
                     await uploadPhotosToDrive(payload)
                 }
 
-                const photoText = selectedPhotos.length ? `${selectedPhotos.length}枚（Drive保存済み）` : "なし"
+                const photoText = selectedPhotos.length ? `${selectedPhotos.length}枚` : "なし"
                 const message = `依頼番号：${requestNo}\n駆除対象：${animal}\n駆除方法：${method}\nハンターへの協力可能事項：${hunterSupport}\n住所：${confirmedAddress}\n座標：${lat}, ${lng}\n写真：${photoText}`
 
                 el("sendStatus").innerText = "LINEへ依頼内容を送信中..."
@@ -731,12 +825,12 @@
                     ])
                     liff.closeWindow()
                 } else {
-                    alert(message)
+                    showAppDialog(message)
                     el("sendStatus").innerText = "ブラウザ確認モード：LINE送信は行っていません。"
                 }
             } catch (e) {
                 console.error(e)
-                alert(e.message || "送信処理に失敗しました。")
+                showAppDialog(e.message || "送信処理に失敗しました。")
                 el("sendStatus").innerText = "送信できませんでした。内容を確認して再度お試しください。"
             } finally {
                 isSending = false
