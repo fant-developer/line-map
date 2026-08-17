@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -15,8 +16,13 @@
             --light: #f5f7fa;
             --border: #d9dee7;
         }
-        * { box-sizing: border-box; }
-        html, body {
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
             margin: 0;
             padding: 0;
             min-height: 100%;
@@ -24,10 +30,12 @@
             background: var(--light);
             color: #222;
         }
+
         body {
             padding: 10px;
             padding-bottom: calc(82px + env(safe-area-inset-bottom));
         }
+
         .card {
             background: #fff;
             border: 1px solid var(--border);
@@ -36,21 +44,25 @@
             margin-bottom: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, .04);
         }
+
         .section-title {
             display: block;
             font-weight: 800;
             margin-bottom: 6px;
         }
+
         .description {
             margin: 0 0 12px;
             color: var(--gray);
             line-height: 1.6;
             font-size: .94rem;
         }
+
         .muted {
             color: var(--gray);
             font-size: .9rem;
         }
+
         .notice {
             margin-top: 8px;
             padding: 10px;
@@ -60,33 +72,48 @@
             line-height: 1.5;
             font-size: .9rem;
         }
+
         .notice.error {
             background: #fff5f5;
             border-color: #f0b4b4;
             color: #b71c1c;
         }
+
         .notice.success {
             background: #f2fbf5;
             border-color: #a9dfb7;
             color: #176b31;
         }
+
         label {
             display: block;
             font-weight: 800;
             margin: 12px 0 6px;
         }
-        select, button, input[type="file"] {
+
+        select,
+        button,
+        input[type="file"] {
             width: 100%;
             font: inherit;
             border-radius: 10px;
         }
+
         select {
             border: 1px solid var(--border);
             padding: 12px;
             background: #fff;
         }
-        button { cursor: pointer; }
-        #mapWrap { position: relative; width: 100%; }
+
+        button {
+            cursor: pointer;
+        }
+
+        #mapWrap {
+            position: relative;
+            width: 100%;
+        }
+
         #map {
             width: 100%;
             height: 65vh;
@@ -96,6 +123,7 @@
             border: 1px solid var(--border);
             background: #ddd;
         }
+
         .place-box {
             border: 1px solid var(--border);
             border-radius: 10px;
@@ -106,7 +134,12 @@
             word-break: break-word;
             font-size: .92rem;
         }
-        .place-title { font-weight: 800; margin-bottom: 4px; }
+
+        .place-title {
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
         #confirmBtn {
             margin-top: 10px;
             padding: 13px 12px;
@@ -116,18 +149,57 @@
             font-size: 1rem;
             font-weight: 800;
         }
+
         #photoInput {
-            display: block;
-            padding: 11px;
-            border: 1px solid var(--border);
-            background: #fff;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
+
+        .photo-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .photo-picker-button {
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .photo-picker-button:active {
+            transform: translateY(1px);
+        }
+
+        #photoMeta {
+            flex: 1 1 auto;
+            margin-top: 0;
+            min-width: 0;
+        }
+
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 8px;
             margin-top: 10px;
         }
+
         .photo-item {
             position: relative;
             border: 1px solid var(--border);
@@ -136,12 +208,14 @@
             background: #f2f2f2;
             aspect-ratio: 1 / 1;
         }
+
         .photo-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
+
         .photo-remove {
             position: absolute;
             top: 4px;
@@ -156,12 +230,14 @@
             line-height: 30px;
             padding: 0;
         }
+
         .photo-meta {
             margin-top: 8px;
             font-size: .88rem;
             color: var(--gray);
             line-height: 1.5;
         }
+
         .footer {
             position: fixed;
             left: 0;
@@ -173,6 +249,7 @@
             backdrop-filter: blur(8px);
             z-index: 20;
         }
+
         #sendBtn {
             border: none;
             background: var(--line);
@@ -181,18 +258,37 @@
             font-size: 1.08rem;
             font-weight: 800;
         }
-        #sendBtn:disabled, #confirmBtn:disabled {
+
+        #sendBtn:disabled,
+        #confirmBtn:disabled {
             background: #999;
             cursor: not-allowed;
         }
-        #sendStatus { margin-top: 8px; text-align: center; font-size: .9rem; }
+
+        #sendStatus {
+            margin-top: 8px;
+            text-align: center;
+            font-size: .9rem;
+        }
+
         @media (max-width: 420px) {
-            body { padding: 10px; padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
-            #map { height: 54vh; min-height: 300px; }
-            .photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            body {
+                padding: 10px;
+                padding-bottom: calc(112px + env(safe-area-inset-bottom));
+            }
+
+            #map {
+                height: 54vh;
+                min-height: 300px;
+            }
+
+            .photo-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
         }
     </style>
 </head>
+
 <body>
     <strong class="section-title">駆除依頼内容</strong>
     <section class="card">
@@ -225,18 +321,22 @@
     </section>
 
     <section class="card">
-        <strong class="section-title">現場写真</strong>
-        <p class="description">駆除依頼場所の写真を最大5枚まで登録できます。送信時に画像を縮小し、Google Driveへ保存します。</p>
+        <strong class="section-title">駆除依頼場所写真（任意）</strong>
+        <p class="description">駆除依頼場所の写真を最大5枚まで登録できます。<br>1枚あたり10MBまで選択できます。</p>
+        <div class="photo-picker">
+            <label for="photoInput" class="photo-picker-button">写真を選択</label>
+            <div id="photoMeta" class="photo-meta">写真 0 / 5枚</div>
+        </div>
         <input id="photoInput" type="file" accept="image/*" multiple>
         <div id="photoGrid" class="photo-grid"></div>
-        <div id="photoMeta" class="photo-meta">写真：0 / 5枚</div>
-        <div id="photoNotice" class="notice">写真は任意です。1枚あたり10MBまで選択できます。</div>
     </section>
 
     <section class="card">
         <strong class="section-title">駆除依頼場所の選択</strong>
         <p id="info" class="description">地図上の駆除依頼地点をタップして、場所を確定してください。</p>
-        <div id="mapWrap"><div id="map"></div></div>
+        <div id="mapWrap">
+            <div id="map"></div>
+        </div>
         <button id="confirmBtn" type="button" disabled>この場所で確定</button>
         <div id="placeBox" class="place-box">
             <div class="place-title">選択場所</div>
@@ -253,7 +353,7 @@
     <script>
         const LIFF_ID = "2009188516-g4iIlaf8"
         const GOOGLE_API_KEY = "AIzaSyBoyT10gc7UNf9j9SKKp_GRDdS7QNfMYrk"
-        const DEFAULT_CENTER = { lat: 34.52815856202822, lng: 135.95238437983932 }
+        const DEFAULT_CENTER = {lat: 34.52815856202822, lng: 135.95238437983932}
 
         // GAS Webアプリを作成後、/exec で終わるURLを設定してください。
         // 例: https://script.google.com/macros/s/XXXXXXXXXXXXXXXX/exec
@@ -298,9 +398,9 @@
 
         async function initLiff() {
             try {
-                await liff.init({ liffId: LIFF_ID })
+                await liff.init({liffId: LIFF_ID})
                 if (!liff.isLoggedIn()) {
-                    liff.login()
+                    //                    liff.login()
                     return
                 }
                 lineProfile = await liff.getProfile()
@@ -357,7 +457,7 @@
             updateSendButtonState()
             renderPlaceBox("住所取得中...", previewLatLng.lat(), previewLatLng.lng())
 
-            geocoder.geocode({ location: previewLatLng }, (results, status) => {
+            geocoder.geocode({location: previewLatLng}, (results, status) => {
                 if (currentId !== mapRequestId) return
                 if (status === "OK" && results[0]) {
                     previewAddress = results[0].formatted_address
@@ -457,7 +557,9 @@
                 grid.appendChild(item)
             })
             const totalBytes = selectedPhotos.reduce((sum, photo) => sum + photo.blob.size, 0)
-            el("photoMeta").innerText = `写真：${selectedPhotos.length} / ${MAX_PHOTOS}枚（送信予定 約${formatBytes(totalBytes)}）`
+            el("photoMeta").innerText = selectedPhotos.length
+                ? `写真 ${selectedPhotos.length} / ${MAX_PHOTOS}枚（送信サイズ 約${formatBytes(totalBytes)}）`
+                : `写真 0 / ${MAX_PHOTOS}枚`
             if (selectedPhotos.length) {
                 showPhotoNotice(`送信時に長辺${MAX_LONG_EDGE}px以下・JPEGへ変換して保存します。`, false)
             } else {
@@ -477,7 +579,7 @@
             const canvas = document.createElement("canvas")
             canvas.width = width
             canvas.height = height
-            const ctx = canvas.getContext("2d", { alpha: false })
+            const ctx = canvas.getContext("2d", {alpha: false})
             ctx.fillStyle = "#ffffff"
             ctx.fillRect(0, 0, width, height)
             ctx.drawImage(image, 0, 0, width, height)
@@ -486,7 +588,7 @@
                 canvas.toBlob((result) => result ? resolve(result) : reject(new Error("JPEG conversion failed")), "image/jpeg", JPEG_QUALITY)
             })
             if (image._objectUrl) URL.revokeObjectURL(image._objectUrl)
-            return { blob, previewUrl: URL.createObjectURL(blob), originalName: file.name }
+            return {blob, previewUrl: URL.createObjectURL(blob), originalName: file.name}
         }
 
         function loadImage(file) {
@@ -559,8 +661,7 @@
                 rootFolderName: DRIVE_ROOT_FOLDER_NAME,
                 requestFolderName: requestNo,
                 requestNo,
-                // GAS側でLINE PlatformにIDトークンを照合し、sub(userId) と name(displayName) から
-                // 「LINEID_表示名」フォルダ名を生成してください。
+                // GAS側でLINE PlatformにIDトークンを照合し、sub(userId) と name(displayName) から「LINEID_表示名」フォルダ名を生成。
                 idToken,
                 createdAt: new Date().toISOString(),
                 photos
@@ -577,14 +678,14 @@
         }
 
         async function uploadPhotosToDrive(payload) {
-            if (!selectedPhotos.length) return { skipped: true }
+            if (!selectedPhotos.length) return {skipped: true}
             if (!GAS_WEB_APP_URL) {
                 throw new Error("GAS_WEB_APP_URL が未設定です。Drive保存用GASのURLを設定してください。")
             }
 
             const response = await fetch(GAS_WEB_APP_URL, {
                 method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                headers: {"Content-Type": "text/plain;charset=utf-8"},
                 body: JSON.stringify(payload),
                 redirect: "follow"
             })
@@ -632,8 +733,8 @@
                 el("sendStatus").innerText = "LINEへ依頼内容を送信中..."
                 if (typeof liff !== "undefined" && liff.isInClient()) {
                     await liff.sendMessages([
-                        { type: "text", text: "駆除依頼登録をお願いします" },
-                        { type: "text", text: message }
+                        {type: "text", text: "駆除依頼登録をお願いします"},
+                        {type: "text", text: message}
                     ])
                     liff.closeWindow()
                 } else {
@@ -682,4 +783,5 @@
         loadGoogleMaps()
     </script>
 </body>
+
 </html>
