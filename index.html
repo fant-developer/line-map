@@ -815,7 +815,7 @@
                 }
 
                 const photoText = selectedPhotos.length ? `${selectedPhotos.length}枚` : "なし"
-                const message = `依頼番号：${requestNo}\n駆除対象：${animal}\n駆除方法：${method}\nハンターへの協力可能事項：${hunterSupport}\n住所：${confirmedAddress}\n座標：${lat}, ${lng}\n写真：${photoText}`
+                const message = `受付ID：${requestNo}\n駆除対象：${animal}\n駆除方法：${method}\nハンターへの協力可能事項：${hunterSupport}\n住所：${confirmedAddress}\n座標：${lat}, ${lng}\n写真：${photoText}`
 
                 el("sendStatus").innerText = "LINEへ依頼内容を送信中..."
                 if (typeof liff !== "undefined" && liff.isInClient()) {
