@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -16,9 +17,13 @@
       --tabs-h: 58px;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       margin: 0;
@@ -29,7 +34,9 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    button { font: inherit; }
+    button {
+      font: inherit;
+    }
 
     .sticky-shell {
       position: sticky;
@@ -69,7 +76,7 @@
     }
 
     .service-name {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 700;
       white-space: nowrap;
     }
@@ -84,8 +91,8 @@
     .tabs-wrap {
       min-height: var(--tabs-h);
       background: var(--fant-yellow);
-      border-bottom: 1px solid rgba(0,0,0,.18);
-      box-shadow: 0 2px 7px rgba(0,0,0,.08);
+      border-bottom: 1px solid rgba(0, 0, 0, .18);
+      box-shadow: 0 2px 7px rgba(0, 0, 0, .08);
     }
 
     .tabs {
@@ -100,16 +107,18 @@
       overscroll-behavior-x: contain;
     }
 
-    .tabs::-webkit-scrollbar { display: none; }
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
 
     .tab {
       flex: 0 0 auto;
       min-height: 40px;
       padding: 8px 16px;
       appearance: none;
-      border: 1px solid rgba(0,0,0,.28);
+      border: 1px solid rgba(0, 0, 0, .28);
       border-radius: 999px;
-      background: rgba(255,255,255,.55);
+      background: rgba(255, 255, 255, .55);
       color: #222;
       font-size: 14px;
       font-weight: 700;
@@ -134,7 +143,7 @@
       border-radius: 10px;
       padding: 28px 26px 40px;
       min-height: 65vh;
-      box-shadow: 0 3px 10px rgba(0,0,0,.07);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, .07);
     }
 
     .doc-heading {
@@ -162,8 +171,13 @@
       overflow-wrap: anywhere;
     }
 
-    .markdown-body > :first-child { margin-top: 0; }
-    .markdown-body h1 { display: none; }
+    .markdown-body> :first-child {
+      margin-top: 0;
+    }
+
+    .markdown-body h1 {
+      display: none;
+    }
 
     .markdown-body h2 {
       margin: 34px 0 12px;
@@ -177,7 +191,9 @@
       line-height: 1.6;
     }
 
-    .markdown-body p { margin: 0 0 14px; }
+    .markdown-body p {
+      margin: 0 0 14px;
+    }
 
     .markdown-body ol,
     .markdown-body ul {
@@ -234,7 +250,7 @@
     .footer {
       padding: 0 14px 28px;
       text-align: center;
-      color: rgba(0,0,0,.62);
+      color: rgba(0, 0, 0, .62);
       font-size: 12px;
     }
 
@@ -249,7 +265,9 @@
         gap: 10px;
       }
 
-      .fant-logo { width: 52px; }
+      .fant-logo {
+        width: 52px;
+      }
 
       .header-copy {
         display: block;
@@ -264,9 +282,13 @@
         text-overflow: ellipsis;
       }
 
-      .legal-title { color: #d8d8d8; }
+      .legal-title {
+        color: #d8d8d8;
+      }
 
-      .tabs { padding: 8px 10px; }
+      .tabs {
+        padding: 8px 10px;
+      }
 
       .tab {
         min-height: 38px;
@@ -283,7 +305,9 @@
         padding: 22px 18px 32px;
       }
 
-      .doc-heading h1 { font-size: 20px; }
+      .doc-heading h1 {
+        font-size: 20px;
+      }
 
       .markdown-body {
         font-size: 14px;
@@ -371,7 +395,7 @@
       }
 
       async function fetchText(url) {
-        const response = await fetch(url, { cache: "no-cache" })
+        const response = await fetch(url, {cache: "no-cache"})
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         return response.text()
       }
@@ -403,7 +427,7 @@
           const markdown = await fetchText(buildDocUrl(doc.file))
 
           if (window.marked) {
-            marked.setOptions({ gfm: true, breaks: true })
+            marked.setOptions({gfm: true, breaks: true})
             contentEl.innerHTML = marked.parse(markdown)
           } else {
             contentEl.innerHTML =
@@ -418,7 +442,7 @@
           }
 
           document.title = `${doc.label} | ${config.areaName || "Fant"}`
-          window.scrollTo({ top: 0, behavior: "smooth" })
+          window.scrollTo({top: 0, behavior: "smooth"})
         } catch (err) {
           console.error(err)
           showError("文書を読み込めませんでした。", "しばらくしてからもう一度お試しください。")
@@ -471,4 +495,5 @@
     })()
   </script>
 </body>
+
 </html>
