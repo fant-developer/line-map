@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f5ef">
+  <title>利用規約・プライバシーポリシー | Fant</title>
+  <style>
+    :root {
+      --ink: #20241f;
+      --muted: #6f756d;
+      --green: #366844;
+      --green-deep: #244b31;
+      --green-soft: #edf3ed;
+      --paper: #fff;
+      --canvas: #f6f5ef;
+      --line: #dedfd9;
+      --shadow: 0 8px 28px rgba(24, 41, 28, .07);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(246,245,239,.96);
+      border-bottom: 1px solid rgba(54,104,68,.13);
+      backdrop-filter: blur(12px);
+    }
+    .site-header__inner {
+      height: 62px;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 9px;
+      text-decoration: none;
+      min-width: 0;
+    }
+    .brand__name {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: -.04em;
+      color: var(--green-deep);
+    }
+    .brand__sub {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .area-chip {
+      max-width: 48vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green-deep);
+      background: var(--green-soft);
+      border: 1px solid rgba(54,104,68,.16);
+      padding: 7px 10px;
+      border-radius: 999px;
+    }
+
+    .hero {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 30px 18px 18px;
+    }
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(23px, 6vw, 36px);
+      line-height: 1.35;
+      letter-spacing: .01em;
+    }
+    .hero p {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .tabs-wrap {
+      position: sticky;
+      top: 62px;
+      z-index: 20;
+      background: linear-gradient(to bottom, var(--canvas) 75%, rgba(246,245,239,0));
+      padding-bottom: 10px;
+    }
+    .tabs {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 18px 2px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex: 0 0 auto;
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: #4f554e;
+      border-radius: 999px;
+      padding: 10px 15px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .tab[aria-selected="true"] {
+      color: #fff;
+      background: var(--green-deep);
+      border-color: var(--green-deep);
+      box-shadow: 0 4px 14px rgba(36,75,49,.18);
+    }
+
+    .page {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 14px calc(48px + env(safe-area-inset-bottom));
+    }
+    .document {
+      background: var(--paper);
+      border: 1px solid rgba(32,36,31,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 18px 34px;
+      min-height: 55vh;
+    }
+    .doc-heading {
+      margin: 0 0 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .doc-heading__label {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+    .doc-heading h2 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.4;
+    }
+
+    .markdown-body {
+      font-size: 15px;
+      line-height: 1.95;
+      word-break: normal;
+      overflow-wrap: anywhere;
+    }
+    .markdown-body > :first-child { margin-top: 0; }
+    .markdown-body h1 { display: none; }
+    .markdown-body h2 {
+      margin: 34px 0 14px;
+      padding: 0 0 8px 12px;
+      border-left: 4px solid var(--green);
+      border-bottom: 1px solid #ecece7;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+    .markdown-body h3 {
+      margin: 28px 0 10px;
+      color: var(--green-deep);
+      font-size: 16px;
+    }
+    .markdown-body p { margin: 0 0 14px; }
+    .markdown-body ol,
+    .markdown-body ul {
+      margin: 10px 0 18px;
+      padding-left: 1.65em;
+    }
+    .markdown-body li { margin: 5px 0; padding-left: .15em; }
+    .markdown-body li::marker { color: var(--green); font-weight: 700; }
+    .markdown-body strong { color: var(--green-deep); }
+    .markdown-body a { color: var(--green-deep); text-underline-offset: 3px; }
+    .markdown-body blockquote {
+      margin: 18px 0;
+      padding: 13px 15px;
+      background: var(--green-soft);
+      border-left: 3px solid var(--green);
+      border-radius: 0 9px 9px 0;
+      color: #435044;
+    }
+    .markdown-body hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+
+    .loading,
+    .error-box {
+      padding: 42px 18px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .error-box strong { display: block; color: #8b2f2f; margin-bottom: 5px; }
+    .loader {
+      width: 28px;
+      height: 28px;
+      margin: 0 auto 12px;
+      border: 3px solid #dfe6df;
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 18px 28px;
+      color: #858a82;
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    @media (min-width: 760px) {
+      .site-header__inner { height: 72px; }
+      .tabs-wrap { top: 72px; }
+      .hero { padding-top: 42px; padding-bottom: 24px; }
+      .page { padding-left: 18px; padding-right: 18px; }
+      .document { padding: 38px 46px 48px; }
+      .markdown-body { font-size: 15.5px; }
+    }
+  
+        /* Fantイエローを基調にした簡潔な法務ページ */
+        :root {
+            --fant-yellow: #f7d000;
+            --fant-yellow-soft: #fff7c7;
+            --fant-ink: #1f1f1f;
+        }
+
+        .site-header {
+            background: var(--fant-yellow);
+            border-bottom: 1px solid rgba(0,0,0,.08);
+        }
+
+        .brand-mark,
+        .brand-name,
+        .area-badge,
+        .page-title,
+        h1 {
+            color: var(--fant-ink);
+        }
+
+        .hero {
+            padding-top: 18px;
+            padding-bottom: 14px;
+        }
+
+        .hero .eyebrow,
+        .hero .lead {
+            display: none !important;
+        }
+
+        .tabs-wrap {
+            background: #fff;
+            border-bottom: 1px solid #ece7c4;
+        }
+
+        .doc-tab {
+            color: #555;
+            background: transparent;
+            border: 0;
+            border-bottom: 3px solid transparent;
+        }
+
+        .doc-tab.active {
+            color: var(--fant-ink);
+            border-bottom-color: var(--fant-yellow);
+            background: var(--fant-yellow-soft);
+        }
+
+    </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="https://fant.jp/" target="_blank" rel="noopener noreferrer" aria-label="Fant公式サイト">
+        <span class="brand__name">Fant</span>
+        <span class="brand__sub">鳥獣被害対策</span>
+      </a>
+      <div id="areaChip" class="area-chip">読み込み中</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow">LEGAL INFORMATION</p>
+    <h1 id="pageTitle">利用規約・プライバシーポリシー</h1>
+    <p id="pageDescription">本サービスをご利用いただく前に、各文書をご確認ください。</p>
+  </section>
+
+  <div class="tabs-wrap">
+    <nav id="tabs" class="tabs" aria-label="文書一覧"></nav>
+  </div>
+
+  <main class="page">
+    <article class="document" aria-live="polite">
+      <div id="docHeading" class="doc-heading" hidden>
+        <div id="docAreaLabel" class="doc-heading__label"></div>
+        <h2 id="docTitle"></h2>
+      </div>
+      <div id="content" class="markdown-body">
+        <div class="loading"><div class="loader"></div>文書を読み込んでいます。</div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div>運営：株式会社Fant</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search)
+      const area = (params.get("area") || "").trim().toLowerCase()
+      const requestedDoc = (params.get("doc") || "").trim()
+      const AREA_PATTERN = /^[a-z0-9_-]+$/
+
+      const tabsEl = document.getElementById("tabs")
+      const contentEl = document.getElementById("content")
+      const areaChipEl = document.getElementById("areaChip")
+      const pageTitleEl = document.getElementById("pageTitle")
+      const pageDescriptionEl = document.getElementById("pageDescription")
+      const docHeadingEl = document.getElementById("docHeading")
+      const docAreaLabelEl = document.getElementById("docAreaLabel")
+      const docTitleEl = document.getElementById("docTitle")
+
+      let config = null
+      let currentDocKey = null
+
+      function showError(title, detail) {
+        docHeadingEl.hidden = true
+        contentEl.innerHTML = `<div class="error-box"><strong>${escapeHtml(title)}</strong>${escapeHtml(detail || "")}</div>`
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;")
+      }
+
+      function buildDocUrl(file) {
+        if (!file || file.includes("..") || file.startsWith("/") || /:\/\//.test(file)) {
+          throw new Error("Invalid document path")
+        }
+        return `doc/${encodeURIComponent(area)}/${file}`
+      }
+
+      async function fetchText(url) {
+        const response = await fetch(url, {cache: "no-cache"})
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        return response.text()
+      }
+
+      async function loadDocument(docKey, updateHistory = true) {
+        if (!config) return
+        const doc = config.documents.find(item => item.key === docKey) || config.documents[0]
+        if (!doc) {
+          showError("表示できる文書がありません。", "管理者へお問い合わせください。")
+          return
+        }
+
+        currentDocKey = doc.key
+        tabsEl.querySelectorAll(".tab").forEach(button => {
+          const selected = button.dataset.key === currentDocKey
+          button.setAttribute("aria-selected", selected ? "true" : "false")
+        })
+
+        docHeadingEl.hidden = false
+        docAreaLabelEl.textContent = `${config.areaName || area} / ${config.serviceName || "鳥獣駆除依頼システム"}`
+        docTitleEl.textContent = doc.label
+        contentEl.innerHTML = '<div class="loading"><div class="loader"></div>文書を読み込んでいます。</div>'
+
+        try {
+          const markdown = await fetchText(buildDocUrl(doc.file))
+          if (window.marked) {
+            marked.setOptions({gfm: true, breaks: true})
+            contentEl.innerHTML = marked.parse(markdown)
+          } else {
+            contentEl.innerHTML = `<pre style="white-space:pre-wrap;font:inherit;line-height:1.9">${escapeHtml(markdown)}</pre>`
+          }
+
+          if (updateHistory) {
+            const next = new URL(location.href)
+            next.searchParams.set("area", area)
+            next.searchParams.set("doc", doc.key)
+            history.replaceState({}, "", next)
+          }
+          document.title = `${doc.label} | ${config.areaName || "Fant"}`
+          window.scrollTo({top: 0, behavior: "smooth"})
+        } catch (err) {
+          console.error(err)
+          showError("文書を読み込めませんでした。", "しばらくしてからもう一度お試しください。")
+        }
+      }
+
+      function renderTabs() {
+        tabsEl.innerHTML = ""
+        config.documents.forEach(doc => {
+          const button = document.createElement("button")
+          button.type = "button"
+          button.className = "tab"
+          button.dataset.key = doc.key
+          button.setAttribute("aria-selected", "false")
+          button.textContent = doc.label
+          button.addEventListener("click", () => loadDocument(doc.key))
+          tabsEl.appendChild(button)
+        })
+      }
+
+      async function init() {
+        if (!AREA_PATTERN.test(area)) {
+          areaChipEl.textContent = "Fant"
+          showError("自治体が指定されていません。", "正しいリンクから開いてください。")
+          return
+        }
+
+        try {
+          const configText = await fetchText(`doc/${encodeURIComponent(area)}/config.json`)
+          config = JSON.parse(configText)
+
+          if (!Array.isArray(config.documents) || config.documents.length === 0) {
+            throw new Error("documents is empty")
+          }
+
+          areaChipEl.textContent = config.areaName || area
+          pageTitleEl.textContent = config.pageTitle || "利用規約・プライバシーポリシー"
+          pageDescriptionEl.textContent = config.description || "本サービスをご利用いただく前に、各文書をご確認ください。"
+
+          renderTabs()
+          const initial = config.documents.some(d => d.key === requestedDoc)
+            ? requestedDoc
+            : (config.defaultDocument || config.documents[0].key)
+          await loadDocument(initial, false)
+        } catch (err) {
+          console.error(err)
+          areaChipEl.textContent = area
+          showError("ページ設定を読み込めませんでした。", "URLまたは自治体設定をご確認ください。")
+        }
+      }
+
+      init()
+    })()
+  </script>
+</body>
+</html>

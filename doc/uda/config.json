@@ -1,0 +1,19 @@
+{
+  "areaName": "宇陀市",
+  "serviceName": "鳥獣駆除依頼システム",
+  "pageTitle": "利用規約・プライバシーポリシー",
+  "description": "宇陀市の鳥獣駆除依頼システムに関する各文書をご確認いただけます。",
+  "defaultDocument": "terms",
+  "documents": [
+    {
+      "key": "terms",
+      "label": "利用規約",
+      "file": "terms.md"
+    },
+    {
+      "key": "privacy",
+      "label": "プライバシーポリシー",
+      "file": "privacy.md"
+    }
+  ]
+}
